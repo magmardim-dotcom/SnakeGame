@@ -1,76 +1,53 @@
-local t = {
-    {1,1,1,1,1},
-    {1,0,0,0,1},
-    {1,1,1,0,1},
-    {1,0,0,0,1},
-    {1,1,1,1,1},
-  }
-  
-  function ser_nod(graf, nam)
-      local nod = graf[nam]
-      if not nod then 
-        nod = {nam = nam, adj = {}} 
-        graf[nam] = nod
-      end
-      
-      return nod
-  end
-  
-  function fromTabletoGraf(t)
-    local graf = {}
-    
-    for y = 1, #t do
-      for x = 1, #t[y] do
-        local cell = t[y][x]
-        
-        if cell == 0 then
-          local nam = y.."-"..x
-          local node = ser_nod(graf, nam)
-          if t[y][x-1] == 0 then local to = ser_nod(graf, y.."-"..(x-1)) node.adj[to] = true end
-          if t[y][x+1] == 0 then local to = ser_nod(graf, y.."-"..(x+1)) node.adj[to] = true end
-          if t[y-1][x] == 0 then local to = ser_nod(graf, (y-1).."-"..x) node.adj[to] = true end
-          if t[y+1][x] == 0 then local to = ser_nod(graf, (y+1).."-"..x) node.adj[to] = true end
+local Queue = require("Queue")
+
+-- Функция BFS, использующая нашу очередь
+local function bfs(grid, startX, startY, targetX, targetY)
+    local visited = {}
+    local parent  = {}
+
+    local q = Queue.new()
+    q:enqueue({x = startX, y = startY})
+
+    visited[startY] = true
+    visited[startY] = visited[startY] or {}
+    visited[startY][startX] = true
+
+    local dirs = {
+        {0, 1}, {1, 0}, {0, -1}, {-1, 0}
+    }
+
+    while not q:isEmpty() do
+        local node = q:dequeue()
+        local x, y = node.x, node.y
+
+        -- Яблоко найдено – восстанавливаем путь
+        if x == targetX and y == targetY then
+            local path = {}
+            while not (x == startX and y == startY) do
+                table.insert(path, 1, {x = x, y = y})
+                local p = parent[y][x]
+                x, y = p.x, p.y
+            end
+            return path   -- путь от головы к яблоку
         end
-      end
+
+        -- Перебираем соседей
+        for _, d in ipairs(dirs) do
+            local nx, ny = x + d[1], y + d[2]
+            if nx > 0 and nx <= #grid[1] and
+               ny > 0 and ny <= #grid and
+               grid[ny][nx] == 0 and
+               not (visited[ny] and visited[ny][nx]) then
+
+                visited[ny] = visited[ny] or {}
+                visited[ny][nx] = true
+                parent[ny] = parent[ny] or {}
+                parent[ny][nx] = {x = x, y = y}
+
+                q:enqueue({x = nx, y = ny})
+            end
+        end
     end
-    
-    return graf
-  end
-  
-graf = fromTabletoGraf(t)
-  
-function search(from, to, path, visited)
-  path = path or {}
-  visited = visited or {}
-  
-  if visited[from] then
-    return nil
-  end
-  
-  visited[from] = true
-  path[#path + 1] = from
-  
-  if from == to then
-    return path
-  end
-  
-  for node in pairs(from.adj) do
-    local p = search(node, to, path, visited)
-    if p then return p end
-  end
-  
-  path[#path] = nil
-end
 
-function printpath (path)
-  if path == nil then print "Пути не существует" return false end
-  for k,v in pairs(path) do
-    print(v.nam)
-  end
-  
+    return nil   -- путь не найден
 end
-
-local from = ser_nod(graf, "2-2")
-local to = ser_nod(graf, "4-2")
-path = search(from, to)
-printpath(path)
