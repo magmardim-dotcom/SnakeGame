@@ -13,12 +13,13 @@ local options = {}
 	options.msg = ""
 
 function options:draw(x, y)
-	local a = 28
+	local a = 28*scaleH
+	local sW, sH = self.width*scaleW, self.height*scaleH
 	
 	love.graphics.push()
 		love.graphics.translate(x,y)
 		love.graphics.setColor(0,0,0, 1)
-		love.graphics.rectangle('fill', 0,0, self.width, self.height)
+		love.graphics.rectangle('fill', 0,0, sW, sH)
 		love.graphics.setColor(palette[game.palette][2])
 		
 		local texts = {
@@ -39,13 +40,13 @@ function options:draw(x, y)
 		end
 		
 		love.graphics.translate(0, a/2)
-		love.graphics.printf(msg(texts, 1), font, 0, 0, self.width, "center")
-		love.graphics.printf(msg(texts, 2), font, 0, a, self.width, "center")
-		love.graphics.printf(msg(texts, 3), font, 0, a*2, self.width, "center")
+		love.graphics.printf(msg(texts, 1), 0, 0, sW, "center")
+		love.graphics.printf(msg(texts, 2), 0, a, sW, "center")
+		love.graphics.printf(msg(texts, 3), 0, a*2, sW, "center")
 		love.graphics.translate(0, 10)
-		love.graphics.printf("Твой счёт: "..game.score, font, 0, a*5, self.width, "center")
+		love.graphics.printf("Твой счёт: "..game.score, 0, a*5, sW, "center")
 		love.graphics.setColor(palette[game.palette][4])
-		love.graphics.printf(self.msg, font, 0, a*3, self.width, "center")
+		love.graphics.printf(self.msg, 0, a*3, sW, "center")
 	love.graphics.pop()
 end
 

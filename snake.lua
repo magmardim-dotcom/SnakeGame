@@ -25,9 +25,12 @@ function snake:draw(rgb)
 	for i = 1, #self.points do
 		local p = self.points[i]
 		local l = 0.7/#self.points
-	
-		love.graphics.setColor(rgb[1],rgb[2],rgb[3],1.1-l*i)
-		love.graphics.rectangle('fill', (p.x-1)*cell, (p.y-1)*cell, cell*0.9, cell*0.9)
+		love.graphics.push()
+			love.graphics.setColor(rgb[1],rgb[2],rgb[3],1.1-l*i)
+			love.graphics.translate(cell/2, cell/2)
+			love.graphics.circle('fill', (p.x-1)*cell, (p.y-1)*cell, cell*0.45)
+			--~ love.graphics.rectangle('fill', (p.x-1)*cell, (p.y-1)*cell, cell*0.9, cell*0.9)
+		love.graphics.pop()
 	end
 end
 

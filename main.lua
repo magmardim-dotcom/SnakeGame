@@ -11,7 +11,7 @@ palette = require "palette-list"
 
 function love.load()
 	math.randomseed(os.time())
-	
+	love.graphics.setDefaultFilter('linear')
 	font = love.graphics.newFont("gcmc.otf", 24)
 	font_fullscreen = love.graphics.newFont("gcmc.otf", 24*scaler())
 	love.graphics.setFont(font)
@@ -38,18 +38,19 @@ end
 function love.draw()
 	love.graphics.setBackgroundColor(1,1,1)
 	game:draw_top_menu()
+	
 	love.graphics.push()
 		love.graphics.scale(scaleW, scaleH)
 		scene:draw()
 		love.graphics.setColor(1,1,1)	
-		if not game.play then
-			local x = def_width/2 - options.width/2
-			local y = def_height/2 - options.height/2
-			
-			options:draw(x,y)
-		end
+		
 	love.graphics.pop()
-	
+	if not game.play then
+		local x = love.graphics.getWidth()/2 - options.width/2*scaleW
+		local y = love.graphics.getHeight()/2 - options.height/2*scaleH
+			
+		options:draw(x,y)
+	end
 	if dbg then dbg:draw() end
 end
 

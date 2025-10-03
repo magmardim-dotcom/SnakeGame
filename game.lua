@@ -5,7 +5,7 @@ local game = {}
 	game.best = 0
 	game.lvl = 1
 	game.delay = 0
-	game.speed = 12
+	game.speed = 4
 	game.palette = 3
 	game.highscores = {
 		[1] = 100, [2] = 0, [3] = 0, [4] = 0, [5] = 0, 
