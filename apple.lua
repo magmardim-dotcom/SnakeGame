@@ -6,6 +6,7 @@ function apple:load()
 	apple.r = 0
 	apple.angle = math.pi/2
 	self:move_random()
+	apple.calories = 25
 end
 
 function apple:draw(r,g,b)

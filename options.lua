@@ -1,7 +1,7 @@
 local options = {}
 	options.item = 2
 	options.width = 400
-	options.height = 200
+	options.height = 280
 	options.game_over = {
 		[0] = "Ну ты и Тормозила!",
 		[1] = "Уже лучше, но плохо...",
@@ -15,18 +15,21 @@ local options = {}
 function options:draw(x, y)
 	local a = 28*scaleH
 	local sW, sH = self.width*scaleW, self.height*scaleH
-	
+	local texts = {
+			[1] = {pos = 1, it = "Уровень: '"..tostring(game.lvl).."'", game.lvl},
+			[2] = {pos = 2, it = "Скорость: '"..tostring(game.speed).."'", game.speed},
+			[3] = {pos = 3, it = "Палитра: '"..tostring(game.palette).."'", game.palette},
+			[4] = {pos = 4, it = "Музыка: '"..tostring(game.music).."'", game.music},
+			[5] = {pos = 5, it = "Змейка: '"..tostring(game.sceen).."'", game.sceen},
+		}
+		
 	love.graphics.push()
 		love.graphics.translate(x,y)
 		love.graphics.setColor(0,0,0, 1)
 		love.graphics.rectangle('fill', 0,0, sW, sH)
 		love.graphics.setColor(palette[game.palette][2])
 		
-		local texts = {
-			[1] = {pos = 1, it = "Уровень: '"..tostring(game.lvl).."'", game.lvl},
-			[2] = {pos = 2, it = "Скорость: '"..tostring(game.speed).."'", game.speed},
-			[3] = {pos = 3, it = "Палитра: '"..tostring(game.palette).."'", game.palette}
-		}
+		
 		
 		local msg = function(tab, t)
 			local text = tab[t].it
@@ -43,10 +46,12 @@ function options:draw(x, y)
 		love.graphics.printf(msg(texts, 1), 0, 0, sW, "center")
 		love.graphics.printf(msg(texts, 2), 0, a, sW, "center")
 		love.graphics.printf(msg(texts, 3), 0, a*2, sW, "center")
+		love.graphics.printf(msg(texts, 4), 0, a*3, sW, "center")
+		love.graphics.printf(msg(texts, 5), 0, a*4, sW, "center")
 		love.graphics.translate(0, 10)
 		love.graphics.printf("Твой счёт: "..game.score, 0, a*5, sW, "center")
 		love.graphics.setColor(palette[game.palette][4])
-		love.graphics.printf(self.msg, 0, a*3, sW, "center")
+		love.graphics.printf(self.msg, 0, a*7, sW, "center")
 	love.graphics.pop()
 end
 
@@ -70,19 +75,22 @@ function options:keypressed(key, down, up, right, left, restart)
 		return var
 	end
 	
-	self.item = turn(self.item, key, down, up, 3)
+	self.item = turn(self.item, key, down, up, 5)
 		
 	if self.item == 1 then
-		game.lvl = turn(game.lvl, key, right, left, 5)
+		game.lvl = turn(game.lvl, key, right, left, #levels)
 	elseif self.item == 2 then
 		game.speed = turn(game.speed, key, right, left, 12)
 	elseif self.item == 3 then
-		game.palette = turn(game.palette, key, right, left, 5)
+		game.palette = turn(game.palette, key, right, left, #palette)
+	elseif self.item == 4 then
+		game.music = turn(game.music, key, right, left, #player)
+	elseif self.item == 5 then
+		game.sceen = turn(game.sceen, key, right, left, 2)
 	end
 	
 	if key == restart then
 		game:restart()
-		print ("::new game::")
 	end
 end
 

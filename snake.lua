@@ -27,9 +27,19 @@ function snake:draw(rgb)
 		local l = 0.7/#self.points
 		love.graphics.push()
 			love.graphics.setColor(rgb[1],rgb[2],rgb[3],1.1-l*i)
-			love.graphics.translate(cell/2, cell/2)
-			love.graphics.circle('fill', (p.x-1)*cell, (p.y-1)*cell, cell*0.45)
-			--~ love.graphics.rectangle('fill', (p.x-1)*cell, (p.y-1)*cell, cell*0.9, cell*0.9)
+			if game.sceen == 1 then
+				love.graphics.translate(cell/2, cell/2)
+				love.graphics.circle('fill', (p.x-1)*cell, (p.y-1)*cell, cell*0.45)
+			elseif game.sceen == 2 then
+				love.graphics.rectangle('fill', (p.x-1)*cell, (p.y-1)*cell, cell*0.9, cell*0.9)
+			elseif game.sceen == 3 then
+				if i == 1 then
+					
+				else
+					love.graphics.translate(cell/2, cell/2)
+					love.graphics.circle('fill', (p.x-1)*cell, (p.y-1)*cell, cell*0.45)
+				end
+			end
 		love.graphics.pop()
 	end
 end
@@ -101,12 +111,15 @@ function snake:eat()
 		apple:move_random()
 		game.score = game.score + game.add_points
 		
-		local e = game.hungry + 25
+		local e = game.hungry + apple.calories
 		if e < 100 then
-			game.hungry = game.hungry + 25
+			game.hungry = game.hungry + apple.calories
 		else
 			game.hungry = 100
 		end
+		
+		eat:setPitch(0.6 + math.random(1, 80)/100)
+		eat:play()
 		
 		if options.game_over[game.score/1000] then 
 			options.msg = options.game_over[game.score/1000]

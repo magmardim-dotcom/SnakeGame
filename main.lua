@@ -9,7 +9,54 @@ scene	= require "scene"
 options	= require "options"
 palette = require "palette-list"
 
+local function load_music(folder)
+	local music = {}
+	
+	items = love.filesystem.getDirectoryItems(folder)
+	
+	for k,v in ipairs(items) do
+		local item = love.audio.newSource(folder.."/"..v, "static")	
+
+		table.insert(music, item)
+	end
+	
+	return music
+end
+
+local function load_levels(folder)
+	local levels = {}
+	
+	items = love.filesystem.getDirectoryItems(folder)
+	
+	for k,v in ipairs(items) do	
+		local i = string.find(v, "%.")		
+		local item = require (folder.."/"..(string.sub(v, 1, i-1)))	
+
+		table.insert(levels, item)
+	end
+	
+	return levels
+end
+
 function love.load()
+	
+	player = load_music("music")
+	game.player = player[game.music]
+	levels = load_levels("levels")
+	screem = love.audio.newSource("fx/aaa.ogg", "stream")
+	
+	game_over = love.audio.newSource("fx/end.ogg", "static")
+	eat = love.audio.newSource("fx/hrum.ogg", "static")
+	
+	love.audio.setEffect("myEffect2", {type="reverb", diffusion = 1, gain = 0.8})
+	love.audio.setEffect("myEffect", {
+		type = "distortion",
+		gain = .6,
+		edge = .3,
+	})
+	screem:setEffect("myEffect")
+	screem:setEffect("myEffect2")
+	
 	math.randomseed(os.time())
 	love.graphics.setDefaultFilter('linear')
 	font = love.graphics.newFont("gcmc.otf", 24)
@@ -58,7 +105,6 @@ function love.update(dt)
 	scene:update(dt)
 	
 	if not game.play then return end
-	
 	game:update(dt)
 end
 
