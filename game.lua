@@ -11,7 +11,7 @@ local game = {}
 	game.player = false
 	game.sceen = 1
 	game.highscores = {
-		[1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, 
+		[1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0
 	}
 	game.hungry = 100
 	game.tremor = Tremor:new(1)
@@ -23,7 +23,7 @@ function game:load()
 end
 
 function game:update(dt)
-	if self.delay % (18 - self.speed) == 0 then
+	if self.delay % (28 - self.speed)/dt == 0 then
 		snake:update(dt)
 	end
 	
@@ -36,7 +36,7 @@ function game:update(dt)
 	end
 	
 	if self.hungry >= 0 then
-		self.hungry = self.hungry - .08
+		self.hungry = self.hungry - 8*dt
 	else
 		self:faled() 
 		screem:stop()

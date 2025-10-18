@@ -112,6 +112,7 @@ function snake:eat()
 		game.score = game.score + game.add_points
 		
 		local e = game.hungry + apple.calories
+		if game.hungry < 25 then e = e*2.5 end
 		if e < 100 then
 			game.hungry = game.hungry + apple.calories
 		else
