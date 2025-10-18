@@ -48,6 +48,7 @@ function game:update(dt)
 	
 	self.tremor:update(dt)
 	
+	if #player <= 0 then return end
 	if self.play then
 		game.player = player[game.music]
 		game.player:setPitch(1 + (self.speed-6)/10)
