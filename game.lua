@@ -36,7 +36,7 @@ function game:update(dt)
 	end
 	
 	if self.hungry >= 0 then
-		self.hungry = self.hungry - 8*dt
+		self.hungry = self.hungry - 6.5*dt
 	else
 		self:faled() 
 		screem:stop()
