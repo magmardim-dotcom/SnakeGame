@@ -80,6 +80,9 @@ function love.load()
 		SetFullscreenMode(true)
 		game.speed = 6
 	end
+	
+	min_dt = 1/140 --fps
+	next_time = love.timer.getTime()
 end
 
 function love.draw()
@@ -99,12 +102,20 @@ function love.draw()
 		options:draw(x,y)
 	end
 	if dbg then dbg:draw() end
+	
+	-- ограничение FPS
+	local cur_time = love.timer.getTime()
+	if next_time <= cur_time then
+		next_time = cur_time
+		return
+	end
+	love.timer.sleep(next_time - cur_time)
 end
 
 function love.update(dt)
-	--~ if dt < 1/30 then
-		--~ love.timer.sleep(1/30 - dt)
-	--~ end
+	-- ограничение FPS
+	next_time = next_time + min_dt
+	
 	scene:update(dt)
 	
 	if not game.play then return end

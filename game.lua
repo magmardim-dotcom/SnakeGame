@@ -23,7 +23,7 @@ function game:load()
 end
 
 function game:update(dt)
-	if self.delay % (28 - self.speed)/dt == 0 then
+	if self.delay % (18 - self.speed) == 0 then
 		snake:update(dt)
 	end
 	

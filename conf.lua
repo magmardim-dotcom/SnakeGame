@@ -21,4 +21,5 @@ function love.conf(t)
     t.window.minheight = def_height
     t.window.fullscreen = false
     t.window.fullscreentype = "desktop"
+    t.window.vsync = 1 
 end
