@@ -25,9 +25,10 @@ function scene:draw()
 				end
 			end
 		end
-				
+		
+		snake:draw(pal[4])		
 		apple:draw(pal[3])
-		snake:draw(pal[4])
+		
 		self.tremor:unset()
 	love.graphics.pop()
 end

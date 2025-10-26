@@ -80,7 +80,7 @@ function options:keypressed(key, down, up, right, left, restart)
 	if self.item == 1 then
 		game.lvl = turn(game.lvl, key, right, left, #levels)
 	elseif self.item == 2 then
-		game.speed = turn(game.speed, key, right, left, 12)
+		game.speed = turn(game.speed, key, right, left, 10)
 	elseif self.item == 3 then
 		game.palette = turn(game.palette, key, right, left, #palette)
 	elseif self.item == 4 then

@@ -6,13 +6,14 @@ local game = {}
 	game.lvl = 1
 	game.delay = 0
 	game.speed = 6
-	game.palette = 3
+	game.palette = 1
 	game.music = 1
 	game.player = false
 	game.sceen = 1
 	game.highscores = {
-		[1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0
+		[1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0
 	}
+	game.hunger = true
 	game.hungry = 100
 	game.tremor = Tremor:new(1)
 	
@@ -23,23 +24,25 @@ function game:load()
 end
 
 function game:update(dt)
-	if self.delay % (18 - self.speed) == 0 then
+	if self.delay % (13 - self.speed) == 0 then
 		snake:update(dt)
 	end
 	
-	if self.hungry < 25 then
-		self.tremor:activate(true)
-		screem:play()		
-	else
-		self.tremor:activate(false)
-		screem:stop()
-	end
-	
-	if self.hungry >= 0 then
-		self.hungry = self.hungry - 6.5*dt
-	else
-		self:faled() 
-		screem:stop()
+	if self.hunger then
+		if self.hungry < 25 then
+			self.tremor:activate(true)
+			screem:play()		
+		else
+			self.tremor:activate(false)
+			screem:stop()
+		end
+		
+		if self.hungry >= 0 then
+			self.hungry = self.hungry - 4.5*dt
+		else
+			self:faled() 
+			screem:stop()
+		end
 	end
 	
 	apple:update(dt)	

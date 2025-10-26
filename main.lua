@@ -8,6 +8,11 @@ game	= require "game"
 scene	= require "scene"
 options	= require "options"
 palette = require "palette-list"
+title	= require "title"
+
+option = {
+	
+}
 
 local function load_music(folder)
 	local music = {}
@@ -81,12 +86,12 @@ function love.load()
 		game.speed = 6
 	end
 	
-	min_dt = 1/140 --fps
+	min_dt = 1/60 --fps
 	next_time = love.timer.getTime()
 end
 
 function love.draw()
-	love.graphics.setBackgroundColor(1,1,1)
+	love.graphics.setBackgroundColor(.88,.90,.92)
 	game:draw_top_menu()
 	
 	love.graphics.push()
@@ -102,6 +107,8 @@ function love.draw()
 		options:draw(x,y)
 	end
 	if dbg then dbg:draw() end
+	
+	--~ title:draw()
 	
 	-- ограничение FPS
 	local cur_time = love.timer.getTime()
