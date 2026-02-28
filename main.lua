@@ -1,5 +1,6 @@
 Tremor 	= require "tremor"
 
+fun = require "function"
 dbg 	= require "dbg"
 snake 	= require "snake"
 apple 	= require "apple"
@@ -10,49 +11,16 @@ options	= require "options"
 palette = require "palette-list"
 title	= require "title"
 
-option = {
-	
-}
-
-local function load_music(folder)
-	local music = {}
-	
-	items = love.filesystem.getDirectoryItems(folder)
-	
-	for k,v in ipairs(items) do
-		local item = love.audio.newSource(folder.."/"..v, "static")	
-
-		table.insert(music, item)
-	end
-	
-	return music
-end
-
-local function load_levels(folder)
-	local levels = {}
-	
-	items = love.filesystem.getDirectoryItems(folder)
-	
-	for k,v in ipairs(items) do	
-		local i = string.find(v, "%.")		
-		local item = require (folder.."/"..(string.sub(v, 1, i-1)))	
-
-		table.insert(levels, item)
-	end
-	
-	return levels
-end
-
 function love.load()
+	math.randomseed(os.time())
+	love.graphics.setDefaultFilter('linear')
+	
+	levels = load_levels("levels")
 	
 	player = load_music("music")
-	game.player = player[game.music]
-	levels = load_levels("levels")
 	screem = love.audio.newSource("fx/aaa.ogg", "stream")
-	
 	game_over = love.audio.newSource("fx/end.ogg", "static")
 	eat = love.audio.newSource("fx/hrum.ogg", "static")
-	
 	love.audio.setEffect("myEffect2", {type="reverb", diffusion = 1, gain = 0.8})
 	love.audio.setEffect("myEffect", {
 		type = "distortion",
@@ -61,9 +29,7 @@ function love.load()
 	})
 	screem:setEffect("myEffect")
 	screem:setEffect("myEffect2")
-	
-	math.randomseed(os.time())
-	love.graphics.setDefaultFilter('linear')
+		
 	font = love.graphics.newFont("gcmc.otf", 24)
 	font_fullscreen = love.graphics.newFont("gcmc.otf", 24*scaler())
 	love.graphics.setFont(font)
@@ -91,15 +57,11 @@ function love.load()
 end
 
 function love.draw()
-	love.graphics.setBackgroundColor(.88,.90,.92)
-	game:draw_top_menu()
+	love.graphics.setBackgroundColor(BG_COLOR)
 	
-	love.graphics.push()
-		love.graphics.scale(scaleW, scaleH)
-		scene:draw()
-		love.graphics.setColor(1,1,1)	
+	scene:draw()
+	game:draw_top_menu()
 		
-	love.graphics.pop()
 	if not game.play then
 		local x = love.graphics.getWidth()/2 - options.width/2*scaleW
 		local y = love.graphics.getHeight()/2 - options.height/2*scaleH
@@ -156,24 +118,6 @@ function love.keypressed(key)
 		else
 			dbg.show = true
 		end
-	end
-end
-
-function scaler()
-	local width, height = love.window.getDesktopDimensions()
-	
-	return width/def_width, height/def_height
-end
-
-function SetFullscreenMode(boolean)
-	if boolean then
-		love.window.setFullscreen(true)
-		scaleW, scaleH = scaler()
-		love.graphics.setFont(font_fullscreen)
-	else
-		love.window.setFullscreen(false)
-		scaleW, scaleH = 1, 1
-		love.graphics.setFont(font)
 	end
 end
 

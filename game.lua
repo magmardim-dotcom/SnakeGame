@@ -20,7 +20,13 @@ local game = {}
 
 function game:load()
 	apple:load()
-	snake:load(8,9,4)
+	snake:load(5,3,4)
+	game.player = player[game.music]
+	
+end
+
+function game:draw()
+	
 end
 
 function game:update(dt)
@@ -74,7 +80,8 @@ function game:faled()
 end
 
 function game:restart()
-	snake:load(8,9,4)
+	scene:load(levels[game.lvl])
+	snake:load(5,3,4)
 	self.score = 0	
 	self.play = true
 	self.hungry = 100
@@ -84,6 +91,8 @@ end
 
 function game:draw_top_menu()	
 	love.graphics.push()
+	love.graphics.setColor(BG_COLOR)
+	love.graphics.rectangle('fill', 0,0,love.graphics.getWidth(), 26*scaleW)
 	love.graphics.setColor(0.3, 0.3, 0.3)
 	love.graphics.translate(0, 0)
 	love.graphics.print("Счет: "..tostring(self.score), 0, 0)
@@ -93,7 +102,8 @@ function game:draw_top_menu()
 	
 	love.graphics.setColor({0.77, 0.41, 0.50})
 	self.tremor:set()
-	love.graphics.rectangle('fill', 120*scaleW, 2*scaleH, 3.6*self.hungry*scaleW, 20*scaleH)
+	love.graphics.scale(scaleW, scaleH)
+	love.graphics.rectangle('fill', 120, 2, 5*self.hungry, 20)
 	self.tremor:unset()
 	love.graphics.pop()
 end

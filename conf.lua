@@ -1,10 +1,11 @@
 scaleW = 1
 scaleH = 1
 
-def_width = 640
-def_height = 360
+def_width = 800
+def_height = 640
 
-cell = 18
+cell = 20
+BG_COLOR = {.88,.90,.92}
 
 function love.conf(t)
     t.identity = 'Mini Snake'
