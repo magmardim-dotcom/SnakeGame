@@ -100,33 +100,35 @@ function snake:move()
 		table.remove(self.points)
 	end
 	
-	--~ snake:auto(apple)
-	
 end
 
 function snake:eat()
 	local head = self.points[1]
 	
-	if head.x == apple.x and head.y == apple.y then
-		apple:move_random()
-		game.score = game.score + game.add_points
-		
-		local e = game.hungry + apple.calories
-		if game.hungry < 25 then e = e*2.5 end
-		if e < 100 then
-			game.hungry = game.hungry + apple.calories
-		else
-			game.hungry = 100
+	for a = 1, #apples do
+		local s = apples[a]
+		if head.x == s.x and head.y == s.y then
+			local x, y = move_random()
+			s.x, s.y = x, y
+			game.score = game.score + game.add_points
+			
+			local e = game.hungry + s.calories
+			if game.hungry < 25 then e = e*2.5 end
+			if e < 100 then
+				game.hungry = game.hungry + s.calories
+			else
+				game.hungry = 100
+			end
+			
+			eat:setPitch(0.6 + math.random(1, 80)/100)
+			eat:play()
+			
+			if options.game_over[game.score/1000] then 
+				options.msg = options.game_over[game.score/1000]
+			end
+			
+			return true
 		end
-		
-		eat:setPitch(0.6 + math.random(1, 80)/100)
-		eat:play()
-		
-		if options.game_over[game.score/1000] then 
-			options.msg = options.game_over[game.score/1000]
-		end
-		
-		return true
 	end
 	return false
 end
@@ -178,133 +180,6 @@ function snake:collision()
 	return false
 end
 
-function snake:auto(apple)
-	local head = self.points[1]
-	
-	local ax = head.x - apple.x
-	local ay = head.y - apple.y
-	
-	local turn = function(m)
-		table.insert(self.moves, m)
-	end
-	
-		local h = self.points[1]
-		local xx = {x = h.x + self.dx, y = h.y}
-		local xl = {x = h.x - self.dx, y = h.y}
-		local yy = {y = h.y + self.dy, x = h.x}
-		local yu = {y = h.y - self.dy, x = h.x}
-	
-					--~ local width = scene.width/18
-					--~ local height = scene.height/18
 
-					--~ local pr = function(h)
-						--~ if h.x == x and h.y == y then
-							--~ return true
-						--~ end
-					--~ end
-					
-					--~ if levels[game.lvl][h.y] and levels[game.lvl][h.y][h.x + self.dx] == 1 then
-						--~ if levels[game.lvl][h.y] and levels[game.lvl][h.y - self.dy][h.x] == 1 then
-							--~ turn("down")
-						--~ else
-							--~ turn("up")
-						--~ end
-						--~ return
-					--~ end
-					--~ if levels[game.lvl][h.y + self.dy] and levels[game.lvl][h.y + self.dy][h.x] == 1 then
-						--~ if levels[game.lvl][h.y] and levels[game.lvl][h.y][h.x + self.dx] == 1 then
-							--~ turn("left")
-						--~ else
-							--~ turn("right")
-						--~ end
-						--~ return
-					--~ end
-	
-	for i = 3, #self.points do
-		local p = self.points[i]
-					
-		local pr = function(h)
-			if h.x == p.x and h.y == p.y then
-				return true
-			end
-		end
-		
-		if pr(xx) then
-			if not pr(yy) then
-				turn("down")
-			else
-				turn("up")
-			end
-			return
-		end
-		
-		if pr(yy) then
-			if not pr(xx) then
-				turn("left")
-			else
-				turn("right")
-			end
-			return
-		end
-		
-	end
-	
-	local proverka = function(x, y)
-		local pr = function(x,y,p)
-			if x == p.x and y == p.y then
-				return true
-			end
-		end
-		for i = 3, #self.points do
-			local p = self.points[i]
-			
-			if pr(x, y, p) then
-				print "body"
-				return true
-			end
-		end
-		
-		--~ local width = scene.width/18
-		--~ local height = scene.height/18
-		--~ for yy = 1, height do
-			--~ for xx = 1, width do
-				--~ local p = {x = xx, y = yy}
-				
-				--~ if levels[game.lvl][y][x] == 1  then
-					--~ print "wall"
-					--~ return true
-				--~ end
-			--~ end
-		--~ end
-		return false
-	end
-		
-	if head.y == apple.y then
-		if ax > 0 and not proverka(h.x - 1, h.y) then
-			turn("left")
-		elseif ax < 0 and not proverka(h.x + 1, h.y) then
-			turn("right")
-		end		
-	end
-	if head.x == apple.x then
-		if ay > 0 and not proverka(h.x, h.y - 1) then
-			turn("up")
-		elseif ay < 0 and not proverka(h.x, h.y + 1) then
-			turn("down")
-		end
-	end
-	
-	--~ if h.x - apple.x > 0 and not proverka(h.x - 1, h.y) then
-		--~ turn("left")
-	--~ elseif h.x - apple.x < 0 and not proverka(h.x + 1, h.y) then
-		--~ turn("right")
-	--~ end
-	--~ if h.y - apple.y > 0 and not proverka(h.x, h.y - 1) then
-		--~ turn("up")
-	--~ elseif h.y - apple.y < 0 and not proverka(h.x, h.y + 1) then
-		--~ turn("down")
-	--~ end
-	
-end
 
 return snake

@@ -19,10 +19,8 @@ local game = {}
 	
 
 function game:load()
-	apple:load()
 	snake:load(5,3,4)
 	game.player = player[game.music]
-	
 end
 
 function game:draw()
@@ -51,7 +49,7 @@ function game:update(dt)
 		end
 	end
 	
-	apple:update(dt)	
+	apples:update(dt)	
 	self.delay = self.delay + 1
 	
 	
@@ -86,7 +84,7 @@ function game:restart()
 	self.play = true
 	self.hungry = 100
 	options.msg = options.game_over[0]
-	apple:load()
+	if #apples == 0 then apples:add() end
 end
 
 function game:draw_top_menu()	
