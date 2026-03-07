@@ -1,9 +1,9 @@
 local game = {}
 	game.play = false
 	game.score = 0
-	game.add_points = 100
+	game.add_points = 10
 	game.best = 0
-	game.lvl = 1
+	game.lvl = 8
 	game.delay = 0
 	game.speed = 6
 	game.palette = 1
@@ -16,15 +16,19 @@ local game = {}
 	game.hunger = true
 	game.hungry = 100
 	game.tremor = Tremor:new(1)
+	game.inital_length = 3
+	game.max_apples = 1
 	
 
 function game:load()
-	snake:load(5,3,4)
+	snake:load(5,3,self.inital_length)
+	scene:load(levels[game.lvl])
 	game.player = player[game.music]
 end
 
 function game:draw()
-	
+	scene:draw()
+	self:draw_top_menu()
 end
 
 function game:update(dt)
@@ -79,12 +83,17 @@ end
 
 function game:restart()
 	scene:load(levels[game.lvl])
-	snake:load(5,3,4)
+	snake:load(5, 2, self.inital_length)
 	self.score = 0	
 	self.play = true
 	self.hungry = 100
 	options.msg = options.game_over[0]
-	if #apples == 0 then apples:add() end
+	if #apples < self.max_apples then
+		apples:add(self.max_apples - #apples)
+	elseif #apples > self.max_apples then
+		apples:remove(#apples - self.max_apples)
+	end
+	apples:reLoad()
 end
 
 function game:draw_top_menu()	

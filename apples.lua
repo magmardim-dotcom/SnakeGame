@@ -1,15 +1,27 @@
 local apples = {}
 
-function apples:add()
-	local apple = {}
-	local x,y = move_random()
-	apple.x = x
-	apple.y = y
-	apple.r = 0
-	apple.angle = math.pi/2
-	apple.calories = 15
-	
-	table.insert(self, apple)
+function apples:add(num)
+	for n = 1, num do
+		local apple = {}
+			apple.x, apple.y = self:move_random()	
+			apple.r = 0
+			apple.angle = math.pi/2
+			apple.calories = 15
+		table.insert(self, apple)
+	end
+end
+
+function apples:remove(num)
+	for n = 1, num do
+		table.remove(self)
+	end
+end
+
+function apples:reLoad()
+	for a = 1, #self do
+		local s = self[a]
+		s.x, s.y = self:move_random()
+	end
 end
 
 function apples:draw(r,g,b)
@@ -36,7 +48,7 @@ function apples:update(dt)
 	end
 end
 
-function move_random()
+function apples:move_random()
 	local x = math.random(2, scene.width/cell-1)
 	local y = math.random(2, scene.height/cell-1)
 	
@@ -44,7 +56,7 @@ function move_random()
 		local p = snake.points[i]
 		
 		if (p.x == x and p.y == y) or (levels[game.lvl][y][x] == 1) then
-			return move_random()
+			return self:move_random()
 		end
 	end
 	

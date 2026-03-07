@@ -1,15 +1,19 @@
 Tremor 	= require "tremor"
+Menu = require "menu"
 
 fun = require "function"
 dbg 	= require "dbg"
 snake 	= require "snake"
 apples 	= require "apples"
-levels	= require "lvls"
 game	= require "game"
 scene	= require "scene"
 options	= require "options"
 palette = require "palette-list"
-title	= require "title"
+
+screens = {
+	['title'] = require "title",
+	['game_options'] = require "game_options",
+}
 
 function love.load()
 	math.randomseed(os.time())
@@ -33,6 +37,8 @@ function love.load()
 	font = love.graphics.newFont("gcmc.otf", 24)
 	font_fullscreen = love.graphics.newFont("gcmc.otf", 24*scaler())
 	love.graphics.setFont(font)
+	
+	screen_selected = 'title'
 		
 	game:load()
 	
@@ -58,19 +64,19 @@ end
 
 function love.draw()
 	love.graphics.setBackgroundColor(BG_COLOR)
-	
-	scene:draw()
-	game:draw_top_menu()
 		
-	if not game.play then
+	if game.play then
+		game:draw()
+	else
 		local x = love.graphics.getWidth()/2 - options.width/2*scaleW
 		local y = love.graphics.getHeight()/2 - options.height/2*scaleH
-			
-		options:draw(x,y)
+		
+		love.graphics.push()
+			screens[screen_selected]:draw()
+		love.graphics.pop()
+		--~ options:draw(x,y)		
 	end
 	if dbg then dbg:draw() end
-	
-	--~ title:draw()
 	
 	-- ограничение FPS
 	local cur_time = love.timer.getTime()
@@ -85,17 +91,21 @@ function love.update(dt)
 	-- ограничение FPS
 	next_time = next_time + min_dt
 	
+	screens[screen_selected]:update(dt)
 	scene:update(dt)
 	
 	if not game.play then return end
 	game:update(dt)
+	
 end
 
 function love.keypressed(key)	
+	screens[screen_selected]:keypressed(key, 'down', 'up', 'right', 'left', 'x')
+	
 	if game.play then
 		snake:control(key)
 	else
-		options:keypressed(key, "s", "w", "d", "a", "x")
+		--~ options:keypressed(key, "s", "w", "d", "a", "x")
 	end
 		
 	if key == 'f1' then

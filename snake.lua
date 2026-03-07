@@ -108,9 +108,9 @@ function snake:eat()
 	for a = 1, #apples do
 		local s = apples[a]
 		if head.x == s.x and head.y == s.y then
-			local x, y = move_random()
+			local x, y = apples:move_random()
 			s.x, s.y = x, y
-			game.score = game.score + game.add_points
+			game.score = game.score + game.add_points * (11 - #apples)
 			
 			local e = game.hungry + s.calories
 			if game.hungry < 25 then e = e*2.5 end

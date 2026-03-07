@@ -23,4 +23,5 @@ function love.conf(t)
     t.window.fullscreen = false
     t.window.fullscreentype = "desktop"
     t.window.vsync = 1 
+    --~ t.window.fullscreentype = 'exclusive'
 end

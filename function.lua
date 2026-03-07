@@ -37,10 +37,15 @@ function SetFullscreenMode(boolean)
 	if boolean then
 		love.window.setFullscreen(true)
 		scaleW, scaleH = scaler()
-		love.graphics.setFont(font_fullscreen)
+		--~ love.graphics.setFont(font_fullscreen)
 	else
 		love.window.setFullscreen(false)
 		scaleW, scaleH = 1, 1
-		love.graphics.setFont(font)
+		--~ love.graphics.setFont(font)
 	end
+end
+
+function switch_screen(to)
+	screen_selected = to
+	return true
 end

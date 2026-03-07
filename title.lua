@@ -1,27 +1,41 @@
-local Title = {}
-
-function Title:draw()
-	local green = {0, .8, 0}
-	local yellow = {1, .62, .31}
-	local sd = function(s, col, size, x, y)
-		local scal = 1 
-		local fullscreen = love.window.getFullscreen( )
-		if fullscreen then
-			scal = scaler()
+local Title = Menu:new({
+	offsetY = 300,
+	indent = 28,
+	txt_color = {1, .62, .31},
+	select_color = {0, .8, 0},
+	strings = {
+		[1] = {nam = "Играть", 
+				act = function() 
+					--~ game:restart()
+					switch_screen('game_options') 
+				end},
+		[2] = {nam = "Настройки", 
+			act = function() 
+				--~ switch_screen('options') 
+			end},
+		[3] = {nam = "Выход", act = function() love.event.quit() end},
+	},
+	pic = function(s)
+		local green = {0, .8, 0}
+		local yellow = {1, .62, .31}
+		local sd = function(s, col, size, x, y)
+			love.graphics.setColor(col)
+			font = love.graphics.newFont("gcmc.otf", size*scaleW)
+			local z = love.graphics.newText(font, s)
+			love.graphics.draw(z, x*scaleW, y*scaleH)
 		end
-		love.graphics.setColor(col)
-		font = love.graphics.newFont("gcmc.otf", size*scal)
-		local z = love.graphics.newText(font, s)
-		love.graphics.draw(z, x*scal, y*scal)
+		
+		love.graphics.push()		
+		love.graphics.translate(260*scaleW, 100*scaleH)
+		sd("а", green, 125, 232, 13)
+		sd("к", yellow, 100, 204, -4)
+		sd("й", green, 75, 168, 30)
+		sd("е", yellow, 75, 128, 25)
+		sd("м", green, 75, 68, 12)
+		sd("З", yellow, 150, 0, 0)
+		love.graphics.pop()
 	end
-	
-	sd("а", green, 125, 400, 33)
-	sd("к", yellow, 100, 372, 16)
-	sd("й", green, 75, 330, 50)
-	sd("е", yellow, 75, 290, 45)
-	sd("м", green, 75, 230, 32)
-	sd("З", yellow, 150, 162, 20)	
-end
+})
 
 
 return Title
