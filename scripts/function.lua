@@ -27,6 +27,10 @@ function load_levels(folder)
 	return levels
 end
 
+function GetPalette(pal)
+	return palette[game.palette]
+end
+
 function scaler()
 	local width, height = love.window.getDesktopDimensions()
 	

@@ -1,8 +1,5 @@
 local Title = Menu:new({
 	offsetY = 300,
-	indent = 28,
-	txt_color = {1, .62, .31},
-	select_color = {0, .8, 0},
 	strings = {
 		[1] = {nam = "Играть", 
 				act = function() 
@@ -16,8 +13,9 @@ local Title = Menu:new({
 		[3] = {nam = "Выход", act = function() love.event.quit() end},
 	},
 	pic = function(s)
-		local green = {0, .8, 0}
-		local yellow = {1, .62, .31}
+		
+		local green = GetPalette()[4]
+		local yellow = GetPalette()[3]
 		local sd = function(s, col, size, x, y)
 			love.graphics.setColor(col)
 			font = love.graphics.newFont("gcmc.otf", size*scaleW)

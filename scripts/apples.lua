@@ -24,7 +24,7 @@ function apples:reLoad()
 	end
 end
 
-function apples:draw(r,g,b)
+function apples:draw(rgb, cell)
 	for a = 1, #self do
 		local size = cell*0.6
 		local center = cell/2
@@ -32,7 +32,7 @@ function apples:draw(r,g,b)
 		local x,y = (s.x-1)*cell, (s.y-1)*cell
 		
 		love.graphics.push()
-		love.graphics.setColor(r,g,b)
+		love.graphics.setColor(rgb[1],rgb[2],rgb[3])
 		love.graphics.translate(x + center, y + center)
 		love.graphics.points(0,0)
 		love.graphics.rotate(s.r)

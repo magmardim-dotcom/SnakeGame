@@ -6,11 +6,12 @@ local scene = {}
 	scene.tr_y = 0 
 
 function scene:load(lvl)
+	cell = lvl.cell or 20
 	self.width = #lvl[1]*cell
 	self.height = #lvl*cell
 end
 
-local function getViewOffset(oy)
+local function getViewOffset(oy, cell)
     local WIDTH = love.graphics.getWidth()
     local HEIGHT = love.graphics.getHeight()
     
@@ -26,8 +27,13 @@ local function getViewOffset(oy)
 
     local offsetX = headX - halfW
     local offsetY = headY - halfH
+    
+    local cx = (WIDTH - scene.width * math.min(scaleW, scaleH))/2
+    if cx < 0 then
+		cx = 0
+    end
 
-    offsetX = math.max(0, math.min(offsetX, mapW - WIDTH))
+    offsetX = math.max(0, math.min(offsetX, mapW - WIDTH)) - cx
     offsetY = math.max(0, math.min(offsetY, mapH - HEIGHT + oy))
 
     return offsetX, offsetY
@@ -37,8 +43,10 @@ function scene:draw()
 	local level = levels[game.lvl] 
 	local pal = palette[game.palette]
 	
-	local menuHeight = 26 * scaleW
-	offsetX, offsetY = getViewOffset(menuHeight)
+	local menuHeight = MENU_HEIGHT * scaleH
+	local cell = cell * math.min(scaleW, scaleH)
+	
+	offsetX, offsetY = getViewOffset(menuHeight, cell)
 	
 	love.graphics.push()		
 		local width = #level[1]
@@ -63,8 +71,8 @@ function scene:draw()
 			end
 		end
 		
-		snake:draw(pal[4])		
-		apples:draw(pal[3])
+		snake:draw(pal[4], cell)		
+		apples:draw(pal[3], cell)
 		
 		self.tremor:unset()
 	love.graphics.pop()

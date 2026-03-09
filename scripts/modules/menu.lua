@@ -1,27 +1,36 @@
-Menu = {}
+local Menu = {}
 	Menu.__index = Menu
 	
 function Menu:new(menu)
 	local menu = menu
-		menu.item = 1
+		menu.item = menu.item or 1
 		menu.offsetX = menu.offsetX or 0
 		menu.offsetY = menu.offsetY or 0
-		menu.indent = menu.indent or 28
-		menu.font = "gcmc.otf"
-		menu.font_size = 24
-		menu.bg_color = menu.bg_color or {1,1,1,1}
-		menu.txt_color = menu.txt_color or {0,0,0}
-		menu.select_color = menu.select_color or {1,0,0}
+		menu.indent = menu.indent or BASIC_INDENT
+		menu.font =  menu.font or BASIC_FONT
+		menu.font_size = 32
+		menu.x = menu.x or 0
+		menu.y = menu.y or 0
+		menu.width = menu.width or love.graphics.getWidth()
+		menu.height = menu.height or love.graphics.getHeight()
 		
 	return setmetatable(menu, self)
 end
 
-function Menu:draw()
-	love.graphics.setColor(self.bg_color)
-	love.graphics.rectangle('fill', 0,0, love.graphics.getWidth(), love.graphics.getHeight())
+function Menu:draw(palette)
+	local width = self.width * scaleW
+	local height = self.height * scaleH
+	
+	love.graphics.push()
+	love.graphics.setColor(palette[2])
+	love.graphics.translate(self.x * scaleW, self.y * scaleH)
+	love.graphics.rectangle('fill', 0,0, width, height)
+	love.graphics.pop()
+	
 	love.graphics.push()	
 	if self.pic then self.pic(self) end
-	local font = love.graphics.newFont(self.font, self.font_size*scaleW)
+	
+	local font = love.graphics.newFont(self.font, self.font_size*scaleH)
 	love.graphics.setFont(font)
 	love.graphics.translate(self.offsetX*scaleW, self.offsetY*scaleH)
 	
@@ -32,22 +41,23 @@ function Menu:draw()
 			local nam = string
 			
 			if self.item == str then
-				love.graphics.setColor(self.select_color)
+				love.graphics.setColor(palette[3])
 				nam = "< "..string.." >"
 			else
 				if s.color then
 					love.graphics.setColor(s.color)
 				else
-					love.graphics.setColor(self.txt_color)
+					love.graphics.setColor(palette[4])
 				end
 			end
 			return nam
 		end
-				
+		
+		local indentS = math.min(scaleH, scaleW)	
 		if type(s.nam) == 'string' then
-			love.graphics.printf(Iselect(s.nam), 0, (self.indent * scaleW) * (str - 1), love.graphics.getWidth(), 'center')
+			love.graphics.printf(Iselect(s.nam), 0, (self.indent * indentS) * (str - 1), love.graphics.getWidth(), 'center')
 		elseif type(s.nam) == 'function' then
-			love.graphics.printf(Iselect(s.nam()), 0, (self.indent * scaleW) * (str - 1), love.graphics.getWidth(), 'center')
+			love.graphics.printf(Iselect(s.nam(self)), 0, (self.indent * indentS) * (str - 1), love.graphics.getWidth(), 'center')
 		end
 		
 	end
@@ -62,6 +72,10 @@ function Menu:keypressed(key, down, up, right, left, restart)
 	function skip(item, it, n)
 		local it = it + n
 		
+		if it == 0 then
+			return #self.strings
+		end
+
 		if item[it] == 'skip' or item[it].skip then
 			return skip(item, it, n)			
 		else

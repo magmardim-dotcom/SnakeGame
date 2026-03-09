@@ -21,10 +21,11 @@ function snake:load(x,y,size)
 	end
 end
 
-function snake:draw(rgb)
+function snake:draw(rgb, cell)
 	for i = 1, #self.points do
 		local p = self.points[i]
 		local l = 0.7/#self.points
+		
 		love.graphics.push()
 			love.graphics.setColor(rgb[1],rgb[2],rgb[3],1.1-l*i)
 			if game.sceen == 1 then
@@ -112,19 +113,16 @@ function snake:eat()
 			s.x, s.y = x, y
 			game.score = game.score + game.add_points * (11 - #apples)
 			
-			local e = game.hungry + s.calories
-			if game.hungry < 25 then e = e*2.5 end
-			if e < 100 then
-				game.hungry = game.hungry + s.calories
-			else
-				game.hungry = 100
+			game.hungry = 20
+			if game.life < 6 then
+				game.life = game.life + 1
 			end
 			
 			eat:setPitch(0.6 + math.random(1, 80)/100)
 			eat:play()
 			
-			if options.game_over[game.score/1000] then 
-				options.msg = options.game_over[game.score/1000]
+			if screens.faled.game_over[game.score/1000] then 
+				screens.faled.msg = screens.faled.game_over[game.score/1000]
 			end
 			
 			return true

@@ -3,9 +3,15 @@ scaleH = 1
 
 def_width = 800
 def_height = 640
+MENU_HEIGHT = 40
+BASIC_FONT = "Opsilon.ttf"
+BASIC_INDENT = 34
 
 cell = 20
-BG_COLOR = {.88,.90,.92}
+
+BG_COLOR = {1,1,1}
+TXT_COLOR = {0,0,1}
+SEL_COLOR = {1,0,0}
 
 function love.conf(t)
     t.identity = 'Mini Snake'

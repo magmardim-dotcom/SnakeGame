@@ -3,31 +3,36 @@ local game = {}
 	game.score = 0
 	game.add_points = 10
 	game.best = 0
-	game.lvl = 8
+	game.lvl = 1
 	game.delay = 0
 	game.speed = 6
-	game.palette = 1
+	game.palette = 5
 	game.music = 1
 	game.player = false
-	game.sceen = 1
+	game.sceen = 2
 	game.highscores = {
 		[1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0
 	}
 	game.hunger = true
-	game.hungry = 100
-	game.tremor = Tremor:new(1)
+	game.hungry = 20
+	game.basic_hungry = 20
+	game.life = 6
+	game.max_life = 6
+	game.tremor = Tremor:new(4)
 	game.inital_length = 3
 	game.max_apples = 1
 	
 
 function game:load()
-	snake:load(5,3,self.inital_length)
+	snake:load(5,2,self.inital_length)
 	scene:load(levels[game.lvl])
 	game.player = player[game.music]
 end
 
 function game:draw()
+
 	scene:draw()
+
 	self:draw_top_menu()
 end
 
@@ -37,22 +42,30 @@ function game:update(dt)
 	end
 	
 	if self.hunger then
-		if self.hungry < 25 then
-			self.tremor:activate(true)
-			screem:play()		
+		if self.life < 2 then
+			screem:play()
 		else
-			self.tremor:activate(false)
 			screem:stop()
 		end
 		
 		if self.hungry >= 0 then
 			self.hungry = self.hungry - 4.5*dt
+			if self.hungry < 10 then
+				self.tremor:activate(true)
+			else
+				self.tremor:activate(false)
+			end
 		else
-			self:faled() 
-			screem:stop()
+			self.hungry = 20
+			self.life = self.life - 1
 		end
 	end
 	
+	if self.life < 1 then
+		self:faled() 
+		screem:stop()
+	end
+
 	apples:update(dt)	
 	self.delay = self.delay + 1
 	
@@ -60,13 +73,13 @@ function game:update(dt)
 	self.tremor:update(dt)
 	
 	if #player <= 0 then return end
-	if self.play then
-		game.player = player[game.music]
-		game.player:setPitch(1 + (self.speed-6)/10)
-		game.player:play()			
-	else
-		game.player:stop()
-	end
+	--~ if self.play then
+		--~ game.player = player[game.music]
+		--~ game.player:setPitch(1 + (self.speed-6)/10)
+		--~ game.player:play()			
+	--~ else
+		--~ game.player:stop()
+	--~ end
 	
 end
 
@@ -86,8 +99,9 @@ function game:restart()
 	snake:load(5, 2, self.inital_length)
 	self.score = 0	
 	self.play = true
-	self.hungry = 100
-	options.msg = options.game_over[0]
+	self.hungry = self.basic_hungry
+	self.life = self.max_life
+	screens.faled.msg = screens.faled.game_over[0]
 	if #apples < self.max_apples then
 		apples:add(self.max_apples - #apples)
 	elseif #apples > self.max_apples then
@@ -99,19 +113,38 @@ end
 function game:draw_top_menu()	
 	love.graphics.push()
 	love.graphics.setColor(BG_COLOR)
-	love.graphics.rectangle('fill', 0,0,love.graphics.getWidth(), 26*scaleW)
+	love.graphics.rectangle('fill', 0,0,love.graphics.getWidth(), MENU_HEIGHT * scaleH)
 	love.graphics.setColor(0.3, 0.3, 0.3)
-	love.graphics.translate(0, 0)
+	
+	local font = love.graphics.newFont(BASIC_FONT, 24*scaleH)
+	
+	love.graphics.pop()	
+	love.graphics.translate(0, 10)
+	love.graphics.setFont(font)
 	love.graphics.print("Счет: "..tostring(self.score), 0, 0)
 	if love.filesystem.getInfo("highscores.txt") then
 		love.graphics.printf("Лучшее: "..tostring(self.highscores[self.lvl]), 0, 0, love.graphics.getWidth(), "right")
 	end
 	
-	love.graphics.setColor({0.77, 0.41, 0.50})
-	self.tremor:set()
-	love.graphics.scale(scaleW, scaleH)
-	love.graphics.rectangle('fill', 120, 2, 5*self.hungry, 20)
-	self.tremor:unset()
+	
+	love.graphics.push()
+		local offset = 10 * scaleW
+		local siz = cell * scaleH
+		
+		love.graphics.translate(300 * scaleW, 2 * scaleH)
+		
+		for l = 1, self.life do			
+			if l == self.life then self.tremor:set() end
+			love.graphics.setColor(palette[game.palette][4])
+			love.graphics.rectangle('fill', (l-1) * (siz + offset), 0, siz, siz)
+			if l == self.life then self.tremor:unset() end
+		end
+		for b = 1, 6 do
+			love.graphics.setColor(0,0,0)
+			love.graphics.rectangle('line', (b-1) * (siz + offset), 0, siz, siz)
+		end
+				
+	
 	love.graphics.pop()
 end
 

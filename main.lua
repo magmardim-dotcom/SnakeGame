@@ -1,18 +1,22 @@
-Tremor 	= require "tremor"
-Menu = require "menu"
+local path = "scripts.modules."
 
-fun = require "function"
+Tremor 	= require (path.."tremor")
+Menu = require (path.."menu")
+
+fun = require "scripts/function"
+snake 	= require "scripts/snake"
+apples 	= require "scripts/apples"
+game	= require "scripts/game"
+scene	= require "scripts/scene"
+palette = require "scripts/palette-list"
+
 dbg 	= require "dbg"
-snake 	= require "snake"
-apples 	= require "apples"
-game	= require "game"
-scene	= require "scene"
-options	= require "options"
-palette = require "palette-list"
 
+path = "scripts.screens."
 screens = {
-	['title'] = require "title",
-	['game_options'] = require "game_options",
+	['title'] = require (path.."title"),
+	['game_options'] = require (path..".game_options"),
+	['faled'] = require (path..".faled"),
 }
 
 function love.load()
@@ -33,10 +37,6 @@ function love.load()
 	})
 	screem:setEffect("myEffect")
 	screem:setEffect("myEffect2")
-		
-	font = love.graphics.newFont("gcmc.otf", 24)
-	font_fullscreen = love.graphics.newFont("gcmc.otf", 24*scaler())
-	love.graphics.setFont(font)
 	
 	screen_selected = 'title'
 		
@@ -60,22 +60,22 @@ function love.load()
 	
 	min_dt = 1/60 --fps
 	next_time = love.timer.getTime()
+	
+	
 end
 
 function love.draw()
 	love.graphics.setBackgroundColor(BG_COLOR)
-		
-	if game.play then
+	
+	if screen_selected == 'faled' then
 		game:draw()
+		if not game.play then 
+			screens[screen_selected]:draw(GetPalette())
+		end
 	else
-		local x = love.graphics.getWidth()/2 - options.width/2*scaleW
-		local y = love.graphics.getHeight()/2 - options.height/2*scaleH
-		
-		love.graphics.push()
-			screens[screen_selected]:draw()
-		love.graphics.pop()
-		--~ options:draw(x,y)		
+		screens[screen_selected]:draw(GetPalette())
 	end
+	
 	if dbg then dbg:draw() end
 	
 	-- ограничение FPS
