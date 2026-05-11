@@ -73,4 +73,4 @@ local GO = {
 	},
 }
 
-return Modules.Menu:new(GO, game)
+return Modules.Menu:new(GO)

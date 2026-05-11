@@ -15,18 +15,19 @@ function funct.loadScripts(folder)
 	return scripts
 end
 
-function funct.loadMusic(folder)
-	local music = {}
+function funct.loadAudio(folder)
+	local audio = {}
 	
 	items = love.filesystem.getDirectoryItems(folder)
 	
 	for k,v in ipairs(items) do
 		local item = love.audio.newSource(folder.."/"..v, "static")	
-
-		table.insert(music, item)
+		
+		audio[v] = item
+		print("load audio: "..v)
 	end
-	
-	return music
+		
+	return audio
 end
 
 function funct.loadLevels(folder)
@@ -52,6 +53,64 @@ end
 function funct.switchScreen(to)
 	curScreen = to
 	return true
+end
+
+function funct.fullScreen(bul)
+	local fullscreen = love.window.getFullscreen( )	
+	local newW, newH = love.graphics.getDimensions() 
+	local scaleW, scaleH = funct.scaler(state.BASIC_W, state.BASIC_H, newW, newH)
+	
+	state.fullScreen = not state.fullScreen
+	love.window.setFullscreen(state.fullScreen)
+	state.scaleW, state.scaleH = scaleW, scaleH
+end
+
+local function serialize(val)
+    local t = type(val)
+    if t == "boolean" then
+        return "bool:" .. (val and "true" or "false")
+    elseif t == "number" then
+        return "num:" .. tostring(val)
+    else
+        return "str:" .. tostring(val)
+    end
+end
+
+local function deserialize(s)
+    local typ, v = s:match("^([%w]+):(.+)$")
+    if typ == "bool" then
+        return v == "true"
+    elseif typ == "num" then
+        return tonumber(v)
+    else
+        return v
+    end
+end
+
+function funct.saveState(state)
+	local lines = {}
+	
+	for k, v in pairs(state) do
+		local t = string.format("[%s]='%s'", k, serialize(v))
+		table.insert(lines, t)
+    end
+    
+    love.filesystem.write("saveState.txt", table.concat(lines, "\n"))
+    return true
+end
+
+function funct.loadState(state)
+	local loaded = state
+
+	if love.filesystem.getInfo("saveState.txt") then
+		for line in love.filesystem.lines("saveState.txt") do
+			local key, var = line:match("^%[(.-)%]%=%'(.-)%'")
+			if key then
+                loaded[key] = deserialize(var)
+            end
+		end
+	end
+	return loaded
 end
 
 return funct

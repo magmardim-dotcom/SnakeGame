@@ -7,13 +7,17 @@ local game = require "scripts/game"
 
 function love.load()
 	math.randomseed(os.time())
+	Font = love.graphics.newFont(state.BASIC_FONT, state.FONT_SIZE, "normal", 4)
+	Audio = funct.loadAudio("resurses/fx")
+	Music = funct.loadAudio("resurses/music")
+	PaletteList = require "scripts/palette-list"
 	Modules = funct.loadScripts("scripts/modules") 
-	game:load(funct.loadLevels("levels"))
+	state = funct.loadState(state) 
+	game:load()
 	Modules.Menu.game = game
 	Screens = funct.loadScripts("scripts/screens")
 		curScreen = 'title'
-	Font = love.graphics.newFont(state.BASIC_FONT, state.FONT_SIZE, "normal", 4)
-	PaletteList = require "scripts/palette-list"
+	
 end
 
 function love.draw()
@@ -47,12 +51,7 @@ function love.keypressed(key)
 	end
 	
 	if key == 'f2' then
-		local fullscreen = love.window.getFullscreen( )
-		love.window.setFullscreen(not fullscreen)
-		local newW, newH = love.graphics.getDimensions() 
-		local scaleW, scaleH = funct.scaler(state.BASIC_W, state.BASIC_H, newW, newH)
-
-		state.scaleW, state.scaleH = scaleW, scaleH
+		funct.fullScreen(not state.fullScreen)
 	end
 	
 	if key == 'escape' then
@@ -65,9 +64,20 @@ function love.keypressed(key)
 end
 
 function love.resize()
-	
+	local newW, newH = love.graphics.getDimensions() 
+	local scaleW, scaleH = funct.scaler(state.BASIC_W, state.BASIC_H, newW, newH)
+	state.scaleW, state.scaleH = scaleW, scaleH
 end
 
 function love.quit()
 	game:quit()
+	funct.saveState(
+		{
+			['palette'] = state.palette,
+			['fullScreen'] = state.fullScreen,
+			['musicPlay'] = state.musicPlay,
+			['musicVol'] = state.musicVol,
+		}
+	)
+	
 end

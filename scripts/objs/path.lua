@@ -1,190 +1,130 @@
 local Path = {}
 Path.__index = Path
 
-function Path:new(x, y)
+function Path:new(x, y, dx, dy, map)
     local path = {}
     setmetatable(path, self)
 
     path.x   = x
     path.y   = y
-    path.tx  = x
-    path.ty  = y
+    path.dx  = dx
+    path.dy  = dy
     path.path = {}
-    path.map  = {}
+    path.map = map
 
     return path
 end
 
-local neighborOffsets = {
-    { 0, -1}, { 1,  0},
-    { 0,  1}, {-1,  0}
-}
---~ -- Возвращает вес клетки (или 0, если клетка вне карты)
---~ local function getWeight(map, x, y)
-    --~ if not map[y] then return 0 end
-    --~ local v = map[y][x]
-    --~ return v or 0
---~ end
+function Path:search(gx, gy)
+    local map   = self.map
+    local maxY  = #map
+    local maxX  = #map[1]
 
---~ -- Стоимость перехода из (x1, y1) в (x2, y2)
---~ local function moveCost(map, x1, y1, x2, y2)
-    --~ local weight = getWeight(map, x2, y2)
-    --~ if weight == 0 then
-        --~ return math.huge 
-    --~ end
-    --~ local diagonal = (x1 ~= x2) and (y1 ~= y2)
-    --~ local base = diagonal and 1.4 or 1.0
-    --~ return base * weight
---~ end
-
--- нахождение длины вектора 
-local function heuristic(x1, y1, x2, y2)
-    return math.abs(x2 - x1) + math.abs(y2 - y1) 
-end
-
-local function insertOpen(open, node)
-    table.insert(open, node)
-    -- Пузырьковая сортировка
-    local i = #open
-    while i > 1 do
-        local p = math.floor(i / 2)
-        if open[p].f <= open[i].f then break end
-        open[p], open[i] = open[i], open[p]
-        i = p
-    end
-end
-
-local function popOpen(open)
-    if #open == 0 then return nil end
-    local root = open[1]
-    local last = table.remove(open)
-    if #open > 0 then
-        open[1] = last
-        
-        local i = 1
-        while true do
-            local l = 2 * i
-            local r = l + 1
-            local smallest = i
-            if l <= #open and open[l].f < open[smallest].f then
-                smallest = l
-            end
-            if r <= #open and open[r].f < open[smallest].f then
-                smallest = r
-            end
-            if smallest == i then break end
-            open[i], open[smallest] = open[smallest], open[i]
-            i = smallest
+    -- ---------- очередь (FIFO) ----------
+    local queue = {}
+    local head  = 1
+    local enqueue = function(s) queue[#queue+1] = s end
+    local dequeue = function()
+        if head <= #queue then
+            local s = queue[head]
+            head = head + 1
+            return s
         end
     end
-    return root
-end
 
-function Path:searchPath(tx, ty, map)
-    self.tx = tx
-    self.ty = ty
-    self.map = map
-    self.path = {}
+    -- ---------- старт ----------
+    local startKey = string.format("%d,%d,%d,%d", self.x, self.y, self.dx, self.dy)
+    local visited  = {[startKey] = true}
+    local pred     = {}          -- key -> предыдущий state
+    enqueue({x=self.x, y=self.y, dx=self.dx, dy=self.dy})
 
-    local closed = {}
+    local goalState = nil
 
-    local open = {}
+    -- ---------- BFS ----------
+    while true do
+        local cur = dequeue()
+        if not cur then break end
 
-    local startKey = self.x .. "," .. self.y
-    local startNode = {
-        x = self.x, y = self.y,
-        g = 0,
-        h = heuristic(self.x, self.y, tx, ty),
-        f = 0 + heuristic(self.x, self.y, tx, ty),
-        parent = nil,
-    }
-    insertOpen(open, startNode)
-
-    local found = false
-    local goalNode = nil
-
-    while #open > 0 do
-        local current = popOpen(open)
-        local currentKey = current.x .. "," .. current.y
-        closed[currentKey] = current
-
-        -- Если дошли до цели
-        if current.x == tx and current.y == ty then
-            found = true
-            goalNode = current
+        if cur.x == gx and cur.y == gy then
+            goalState = cur
             break
         end
 
-        for _, off in ipairs(neighborOffsets) do
-            local nx = current.x + off[1]
-            local ny = current.y + off[2]
-            local neighKey = nx .. "," .. ny
+        -- ---- генерируем только 3 допустимых направления ----
+        local moves = {}
 
-            if map[ny][nx] == 1 then
-                goto continue
-            end
+        -- 1. Прямо
+        table.insert(moves, {dx=cur.dx, dy=cur.dy})
 
-            if closed[neighKey] then
-                goto continue
-            end
+        -- 2. Налево
+        local ldx, ldy
+        if cur.dx == 1 and cur.dy == 0 then           -- идём вправо
+            ldx, ldy = 0, -1
+        elseif cur.dx == -1 and cur.dy == 0 then      -- идём влево
+            ldx, ldy = 0, 1
+        elseif cur.dx == 0 and cur.dy == 1 then       -- идём вниз
+            ldx, ldy = 1, 0
+        else                                          -- идём вверх
+            ldx, ldy = -1, 0
+        end
+        table.insert(moves, {dx=ldx, dy=ldy})
 
-            --~ local tentativeG = current.g + moveCost(map, current.x, current.y, nx, ny)
-            local tentativeG = current.g
+        -- 3. Направо
+        local rdx, rdy
+        if cur.dx == 1 and cur.dy == 0 then           -- идём вправо
+            rdx, rdy = 0, 1
+        elseif cur.dx == -1 and cur.dy == 0 then      -- идём влево
+            rdx, rdy = 0, -1
+        elseif cur.dx == 0 and cur.dy == 1 then       -- идём вниз
+            rdx, rdy = -1, 0
+        else                                          -- идём вверх
+            rdx, rdy = 1, 0
+        end
+        table.insert(moves, {dx=rdx, dy=rdy})
 
-            local inOpen = false
-            local existingNode = nil
-            for _, node in ipairs(open) do
-                if node.x == nx and node.y == ny then
-                    inOpen = true
-                    existingNode = node
-                    break
+        -- ---- проверяем соседние клетки ----
+        for _, m in ipairs(moves) do
+            local nx = cur.x + m.dx
+            local ny = cur.y + m.dy
+
+            if nx >= 1 and nx <= maxX and ny >= 1 and ny <= maxY then
+                if map[ny][nx] == 0 then          -- свободна
+                    local key = string.format("%d,%d,%d,%d", nx, ny, m.dx, m.dy)
+                    if not visited[key] then
+                        visited[key] = true
+                        pred[key] = cur
+                        enqueue({x=nx, y=ny, dx=m.dx, dy=m.dy})
+                    end
                 end
             end
-
-            if not inOpen then
-                local node = {
-                    x = nx, y = ny,
-                    g = tentativeG,
-                    h = heuristic(nx, ny, tx, ty),
-                    f = tentativeG + heuristic(nx, ny, tx, ty),
-                    parent = current,
-                }
-                insertOpen(open, node)
-            elseif tentativeG < existingNode.g then
-                existingNode.g = tentativeG
-                existingNode.f = tentativeG + existingNode.h
-                existingNode.parent = current
-                table.sort(open, function(a, b) return a.f < b.f end)
-            end
-
-            ::continue::
         end
     end
 
-    if found then
-        local node = goalNode
-        local rev = {}
-        while node do
-            table.insert(rev, {x = node.x, y = node.y})
-            node = node.parent
+    -- ---------- восстановление пути ----------
+    self.path = {}
+    if goalState then
+        local s = goalState
+        while true do
+            table.insert(self.path, 1, {x=s.x, y=s.y})
+            local key = string.format("%d,%d,%d,%d", s.x, s.y, s.dx, s.dy)
+            local p = pred[key]
+            if not p then break end
+            s = p
         end
-        self.path = {}
-        for i = #rev, 1, -1 do
-            table.insert(self.path, rev[i])
-        end
-    else
-        self.path = {}
     end
 
-    return found
+    return goalState ~= nil
 end
+
 
 function Path:draw()
 	local CELL = state.CELL
-	for p = 1, #self.path do
+	local b = self.path
+	for p = 1, #b do
 		love.graphics.setColor(0, 1, 0, 0.4)
-		love.graphics.rectangle('fill', (self.path[p].x-1) * CELL, (self.path[p].y-1) * CELL, CELL, CELL)
+		love.graphics.rectangle('fill', (b[p].x-1) * CELL, (b[p].y-1) * CELL, CELL, CELL)
 	end
+	
 end
 
 return Path

@@ -24,13 +24,17 @@ local Faled = Modules.Menu:new({
 			nam = "повторить", 
 			act = function(s) 
 				s.game:restart() 
+				s.item = 5
 			end},
 			
 		[6] = {
 			nam = "назад", 
 			act = function(s) 
 				funct.switchScreen('options') 
-				s.item = 6	 
+				s.game.music:setVolume(state.musicVol)
+				s.game.music:stop()
+				s.game.music:setEffect("reverb", false)
+				s.item = 5	 
 			end},
 	},
 	game_over = {

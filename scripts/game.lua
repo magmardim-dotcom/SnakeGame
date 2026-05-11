@@ -1,46 +1,59 @@
 local game = {}
 		
-function game:load(levels)
+function game:load()
 	self.scene = require "scripts/objs/scene"
 	self.scene.game = self
-	game.play = false
-	game.delay = 0
-	game.score = 0
-	game.add_points = 100
-	game.best = 0	
-	game.speed = 7		
-	game.highscores = {}	
-		for l = 1, #levels do self.highscores[l] = 0 end
-	game.hunger = true
-	game.life = 6
-	game.max_life = 6
-	game.lifes = {}
+	self.levels = funct.loadLevels("levels")
+	self.play = false
+	self.delay = 0
+	self.score = 0
+	self.add_points = 100
+	self.best = 0	
+	self.speed = 7		
+	self.highscores = {}	
+		for l = 1, #self.levels do self.highscores[l] = 0 end
+	self.hunger = true
+	self.life = 6
+	self.max_life = 6
+	self.lifes = {}
 		for l = 1, self.max_life do self.lifes[l] = 20 end
-	game.initalLength = 4
-	game.max_apples = 1
-	game.levels = levels
-	game.lvl = 1
-	game.font = love.graphics.newFont(state.BASIC_FONT, state.FONT2_SIZE, "normal", 2)
-	game.playerControl = {
+	self.initalLength = 4
+	self.max_apples = 1
+	
+	self.lvl = 1
+	self.font = love.graphics.newFont(state.BASIC_FONT, state.FONT2_SIZE, "normal", 2)
+	self.playerControl = {
 		up = "w", down = "s", left = "a", right = "d"
 	}
-	
-	--~ game.player = player[game.music]
-	--~ game.music = 1	
-	
+		
 	if love.filesystem.getInfo("highscores.txt") then
 		local l = 1
 		
 		for lines in love.filesystem.lines("highscores.txt") do
-			game.highscores[l] = tonumber(lines)
+			self.highscores[l] = tonumber(lines)
 			l = l + 1
 		end
 	end	
+	
+	self.audio = {
+		eat = Audio['eat.ogg'],
+		over = Audio['end.ogg']
+	}
+	self.music = Music["track1.ogg"]
+	love.audio.setEffect("reverb", {type="reverb", diffusion = 1, density = 1, gain = 1, roomrolloff = 10})
+	love.audio.setVolume(state.musicVol)
 end
 
 function game:sceneLoad(lvl)
 	self.scene:load(self.levels[lvl], self)
 	
+	if state.musicPlay then
+		self.music:setLooping(true)
+		self.music:play()
+	end
+	
+	for l = 1, self.max_life do self.lifes[l] = 20 end
+	self.life = self.max_life
 end
 
 function game:draw(palette)
@@ -48,7 +61,7 @@ function game:draw(palette)
 	local scale = math.min(state.scaleW, state.scaleH)
 	local widthScene = #self.scene.level[1] * state.CELL * scale
 	local indentX = widthScene <= love.graphics.getWidth() and (love.graphics.getWidth() - widthScene)/2 or 0
-	local indentY = state.MENU_HEIGHT * scale
+	local indentY = state.MENU_HEIGHT * state.scaleH
 
 	love.graphics.push()
 	love.graphics.translate(indentX, indentY)
@@ -56,7 +69,6 @@ function game:draw(palette)
 	love.graphics.pop()
 		
 	self:drawTopMenu(palette)
-	
 end
 
 function game:update(dt)
@@ -74,25 +86,15 @@ function game:update(dt)
 	if self.life < 1 then
 		self:faled()
 	end
-
-		
+	
 	self.delay = self.delay + 1
-
-	
-	--~ if #player <= 0 then return end
-	--[[if self.play then
-		game.player = player[game.music]
-		game.player:setPitch(1 + (self.speed-6)/10)
-		game.player:play()			
-	else
-		game.player:stop()
-	end]]
-	
 end
 
 function game:faled()
 	game.play = false
-	--~ game_over:play()
+	self.music:setVolume(.4)
+	self.music:setEffect("reverb", true)
+	self.audio.over:play()
 	
 	if self.score > self.highscores[self.lvl] then
 		self.highscores[self.lvl] = self.score
@@ -109,13 +111,14 @@ function game:restart()
 	self.play = true
 	for l = 1, self.max_life do self.lifes[l] = 20 end
 	self.life = self.max_life
-	Screens.faled.msg = Screens.faled.game_over[0]
+	Screens.faled.msg = Screens.faled.game_over[0]	
 	
-	
+	self.music:setVolume(1)
+	self.music:setEffect("reverb", false)
 end
 
 function game:keypressed(key, down, up, right, left)
-	self.scene:keypressed(key, "w", "s", "a", "d")
+	self.scene:keypressed(key, self.playerControl)
 end
 
 function game:quit()
@@ -143,7 +146,7 @@ function game:drawTopMenu(palette, font)
 	
 	local score = string.format("Счет: %d", self.score)
 	local best = string.format(
-		"%s лучший: %d", 
+		"%s рекорд: %d", 
 		self.scene.level.name and "["..self.scene.level.name.."]" or "", 
 		self.highscores[self.lvl] or 0
 	)

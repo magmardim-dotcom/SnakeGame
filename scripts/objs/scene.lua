@@ -40,14 +40,11 @@ function scene:load(lvl, game)
 		end
 	end	
 	
-	--~ n = Path:new(self.player.x, self.player.y)
-	--~ n:searchPath(self.apples[1].x, self.apples[1].y, self.level)
 end
 
 function scene:restart()
 	local start = self.level.start
 	self.player:load(start.x, start.y, start.dx, start.dy, self.game.initalLength, self)
-	--~ n:searchPath(self.apples[1].x, self.apples[1].y, self.level)
 end
 
 local function getViewOffset(scene, oy)
@@ -88,40 +85,41 @@ function scene:draw(palette)
 		love.graphics.rectangle('fill', 0,0, width * self.cell * scale, height * self.cell * scale)	
 		love.graphics.setColor(palette[2])
 		love.graphics.draw(self.canvas, 0, 0, 0, scale, scale)
-		self.player:draw(palette[4], self.cell * scale)
-		
+				
 		for _, e in ipairs(self.enemy) do
-			e:draw(palette[4], self.cell * scale)
+			e:draw(palette[2], self.cell * scale)
 		end
 		for _, a in ipairs(self.apples) do
 			a:draw(palette[3], self.cell * scale)
 		end
-		--~ n:draw()
+		
+		self.player:draw(palette[4], self.cell * scale)
 	love.graphics.pop()
 end
 
-function scene:keypressed(key, up, down, left, right)
-	self.player:control(key, up, down, left, right)
+function scene:keypressed(key, control)
+	self.player:control(key, control.up, control.down, control.left, control.right)
 end
 
 function scene:update(dt)
-	for _, e in ipairs(self.enemy) do
-		e:update(dt, 8)
-	end
+	local game = self.game
+	
 	for _, a in ipairs(self.apples) do
 		a:update(dt)
 	end
 	
 	if not self.game.play then return false end
-	if self.game.delay % (13 - self.game.speed) == 0 then
+	if self.game.delay % (13 - game.speed) == 0 then
+		for _, e in ipairs(self.enemy) do
+			e:update(dt)
+		end
 		self.player:update(dt, self.apples)		
 		self.player:eat(self.apples, 
 			function()
-				local game = self.game
-				table.insert(self.apples, Apple:new(self))
-				game.score = game.score + game.add_points
-			
 				local add = 20 - (20 - game.lifes[game.life])
+							
+				game.score = game.score + game.add_points
+							
 				if game.life < 6 then
 					game.lifes[game.life] = 20
 					game.life = game.life + 1
@@ -129,16 +127,18 @@ function scene:update(dt)
 				else
 					game.lifes[game.life] = 20
 				end
+				
+				table.insert(self.apples, Apple:new(self))
 			
-			-- eat:setPitch(0.6 + math.random(1, 80)/100)
-			-- eat:play()
+				game.audio.eat:setPitch(0.6 + math.random(1, 80)/100)
+				game.audio.eat:play()
 			
 				if Screens.faled.game_over[game.score/1000] then 
 					Screens.faled.msg = Screens.faled.game_over[game.score/1000]
 				end
 			end
-		)		
-	end
+		)
+	end	
 end
 
 function scene:getObstacles()

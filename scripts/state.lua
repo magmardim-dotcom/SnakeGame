@@ -10,7 +10,6 @@ state.CELL = 20
 state.BG_COLOR = {1,1,1}
 state.TXT_COLOR = {0,0,1}
 state.SEL_COLOR = {1,0,0}
-state.palette = 3
 state.scaleW = 1
 state.scaleH = 1
 state.FPS = 60
@@ -28,5 +27,10 @@ function state:limitFPS()
 	love.timer.sleep(self.next_time - cur_time)
 end
 
+-- options
+state.palette = 3
+state.musicPlay = true
+state.musicVol = 1
+state.fullScreen = false
 
 return state

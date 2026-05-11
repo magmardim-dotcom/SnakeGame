@@ -11,6 +11,7 @@ function Snake:new(scene, x, y, dx, dy, size)
 		snake.moves = {}
 		snake.points = {}
 			for i = 1, size do table.insert(snake.points, {x = x - i*dx, y = y}) end
+		snake.path = {}
 			
 	return setmetatable(snake, self)
 end
@@ -98,9 +99,9 @@ function Snake:eat(apples, funct)
 		
 	for n, s in ipairs(apples) do
 		if head.x == s.x and head.y == s.y then
-			funct()
+			
 			table.remove(apples, n)
-						
+				funct()		
 			return true
 		end
 	end

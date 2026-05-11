@@ -8,7 +8,7 @@ local Title = Modules.Menu:new({
 				end},
 		[2] = {nam = "Настройки", 
 			act = function() 
-				funct.switchScreen('options') 
+				funct.switchScreen('stateOptions') 
 			end},
 		[3] = {nam = "Выход", act = function() love.event.quit() end},
 	},
