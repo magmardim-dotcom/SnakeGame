@@ -13,5 +13,20 @@ state.SEL_COLOR = {1,0,0}
 state.palette = 3
 state.scaleW = 1
 state.scaleH = 1
+state.FPS = 60
+state.next_time = love.timer.getTime()
+
+function state:limitFPS()
+	local cur_time = love.timer.getTime()
+	
+	self.next_time = self.next_time + 1/self.FPS
+	
+	if self.next_time <= cur_time then
+		self.next_time = cur_time
+		return
+	end
+	love.timer.sleep(self.next_time - cur_time)
+end
+
 
 return state

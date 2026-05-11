@@ -31,6 +31,7 @@ function love.draw()
 end
 
 function love.update(dt)
+	state:limitFPS()
 	game:update(dt) 
 end
 
