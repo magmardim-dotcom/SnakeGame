@@ -1,31 +1,14 @@
-scaleW = 1
-scaleH = 1
-
-def_width = 800
-def_height = 640
-MENU_HEIGHT = 40
-BASIC_FONT = "Opsilon.ttf"
-BASIC_INDENT = 34
-
-cell = 20
-
-BG_COLOR = {1,1,1}
-TXT_COLOR = {0,0,1}
-SEL_COLOR = {1,0,0}
-
 function love.conf(t)
-    t.identity = 'Mini Snake'
+    t.identity = 'Snake'
     t.appendidentity = false
     t.version = "11.3"
     t.console = false 
 
     t.window.title = "Snake"
     t.window.icon = nil
-    t.window.width = def_width * scaleW
-    t.window.height = def_height * scaleH
+    t.window.width = 1000
+    t.window.height = 640
     t.window.resizable = false
-    t.window.minwidth = def_width
-    t.window.minheight = def_height
     t.window.fullscreen = false
     t.window.fullscreentype = "desktop"
     t.window.vsync = 1 

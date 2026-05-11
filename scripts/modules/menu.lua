@@ -6,33 +6,35 @@ function Menu:new(menu)
 		menu.item = menu.item or 1
 		menu.offsetX = menu.offsetX or 0
 		menu.offsetY = menu.offsetY or 0
-		menu.indent = menu.indent or BASIC_INDENT
-		menu.font =  menu.font or BASIC_FONT
-		menu.font_size = 32
 		menu.x = menu.x or 0
 		menu.y = menu.y or 0
 		menu.width = menu.width or love.graphics.getWidth()
 		menu.height = menu.height or love.graphics.getHeight()
+		menu.game = Menu.game
+		menu.frame = menu.frame or false
 		
 	return setmetatable(menu, self)
 end
 
-function Menu:draw(palette)
-	local width = self.width * scaleW
-	local height = self.height * scaleH
+function Menu:draw(color1, color2, color3, font)
+	local width = self.width
+	local height = self.height
 	
 	love.graphics.push()
-	love.graphics.setColor(palette[2])
-	love.graphics.translate(self.x * scaleW, self.y * scaleH)
-	love.graphics.rectangle('fill', 0,0, width, height)
+	love.graphics.setColor(color1)
+	love.graphics.rectangle('fill', self.x * state.scaleW, self.y * state.scaleH, width * state.scaleW, height * state.scaleH)
+	love.graphics.setColor(color2)
+	love.graphics.setLineWidth(10)
+	love.graphics.rectangle('line', self.x * state.scaleW, self.y * state.scaleH, width * state.scaleW, height * state.scaleH)
 	love.graphics.pop()
 	
 	love.graphics.push()	
 	if self.pic then self.pic(self) end
 	
-	local font = love.graphics.newFont(self.font, self.font_size*scaleH)
 	love.graphics.setFont(font)
-	love.graphics.translate(self.offsetX*scaleW, self.offsetY*scaleH)
+	love.graphics.translate(self.offsetX * state.scaleW, self.offsetY * state.scaleH)
+	love.graphics.scale(state.scaleW, state.scaleH)
+	
 	
 	for str = 1, #self.strings do
 		local s = self.strings[str]
@@ -41,26 +43,28 @@ function Menu:draw(palette)
 			local nam = string
 			
 			if self.item == str then
-				love.graphics.setColor(palette[3])
+				love.graphics.setColor(color2)
 				nam = "< "..string.." >"
 			else
 				if s.color then
 					love.graphics.setColor(s.color)
 				else
-					love.graphics.setColor(palette[4])
+					love.graphics.setColor(color3)
 				end
 			end
 			return nam
 		end
 		
-		local indentS = math.min(scaleH, scaleW)	
+		local fontH = font:getHeight()
+		
 		if type(s.nam) == 'string' then
-			love.graphics.printf(Iselect(s.nam), 0, (self.indent * indentS) * (str - 1), love.graphics.getWidth(), 'center')
+			love.graphics.printf(Iselect(s.nam), 0, (fontH) * (str - 1), (love.graphics.getWidth()/state.scaleW), 'center')
 		elseif type(s.nam) == 'function' then
-			love.graphics.printf(Iselect(s.nam(self)), 0, (self.indent * indentS) * (str - 1), love.graphics.getWidth(), 'center')
+			love.graphics.printf(Iselect(s.nam(self)), 0, (fontH) * (str - 1), (love.graphics.getWidth()/state.scaleW), 'center')
 		end
 		
 	end
+	
 	love.graphics.pop()
 end
 
@@ -68,7 +72,7 @@ function Menu:update(dt)
 	
 end
 
-function Menu:keypressed(key, down, up, right, left, restart)
+function Menu:keypressed(key, down, up, left, right, restart)
 	function skip(item, it, n)
 		local it = it + n
 		

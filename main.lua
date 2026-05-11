@@ -1,121 +1,57 @@
-local path = "scripts.modules."
+local dbg = require "scripts/dbg"
+	visDbg = true
 
-Tremor 	= require (path.."tremor")
-Menu = require (path.."menu")
-
-fun = require "scripts/function"
-snake 	= require "scripts/snake"
-apples 	= require "scripts/apples"
-game	= require "scripts/game"
-scene	= require "scripts/scene"
-palette = require "scripts/palette-list"
-
-dbg 	= require "dbg"
-
-path = "scripts.screens."
-screens = {
-	['title'] = require (path.."title"),
-	['game_options'] = require (path..".game_options"),
-	['faled'] = require (path..".faled"),
-}
+funct = require "scripts/functions" 
+state = require "scripts/state"
+local game = require "scripts/game"
 
 function love.load()
 	math.randomseed(os.time())
-	love.graphics.setDefaultFilter('linear')
-	
-	levels = load_levels("levels")
-	
-	player = load_music("music")
-	screem = love.audio.newSource("fx/aaa.ogg", "stream")
-	game_over = love.audio.newSource("fx/end.ogg", "static")
-	eat = love.audio.newSource("fx/hrum.ogg", "static")
-	love.audio.setEffect("myEffect2", {type="reverb", diffusion = 1, gain = 0.8})
-	love.audio.setEffect("myEffect", {
-		type = "distortion",
-		gain = .6,
-		edge = .3,
-	})
-	screem:setEffect("myEffect")
-	screem:setEffect("myEffect2")
-	
-	screen_selected = 'title'
-		
-	game:load()
-	
-	if love.filesystem.getInfo("highscores.txt") then
-		local l = 1
-		
-		for lines in love.filesystem.lines("highscores.txt") do
-			game.highscores[l] = tonumber(lines)
-			l = l + 1
-		end
-	else
-		love.filesystem.newFile("highscores.txt")
-	end
-	
-	if love.system.getOS() == "Linux" then
-		SetFullscreenMode(true)
-		game.speed = 6
-	end
-	
-	min_dt = 1/60 --fps
-	next_time = love.timer.getTime()
-	
-	
+	Modules = funct.loadScripts("scripts/modules") 
+	game:load(funct.loadLevels("levels"))
+	Modules.Menu.game = game
+	Screens = funct.loadScripts("scripts/screens")
+		curScreen = 'title'
+	Font = love.graphics.newFont(state.BASIC_FONT, state.FONT_SIZE, "normal", 4)
+	PaletteList = require "scripts/palette-list"
 end
 
 function love.draw()
-	love.graphics.setBackgroundColor(BG_COLOR)
+	local palette = PaletteList[state.palette]
 	
-	if screen_selected == 'faled' then
-		game:draw()
-		if not game.play then 
-			screens[screen_selected]:draw(GetPalette())
-		end
-	else
-		screens[screen_selected]:draw(GetPalette())
+	if curScreen == "faled"  then
+		game:draw(palette)
 	end
 	
-	if dbg then dbg:draw() end
-	
-	-- ограничение FPS
-	local cur_time = love.timer.getTime()
-	if next_time <= cur_time then
-		next_time = cur_time
-		return
+	if not game.play then
+		Screens[curScreen]:draw(palette[1], palette[2], palette[3], Font)
 	end
-	love.timer.sleep(next_time - cur_time)
+		
+	if visDbg then dbg:draw(30, 50) end
 end
 
 function love.update(dt)
-	-- ограничение FPS
-	next_time = next_time + min_dt
-	
-	screens[screen_selected]:update(dt)
-	scene:update(dt)
-	
-	if not game.play then return end
-	game:update(dt)
-	
+	game:update(dt) 
 end
 
-function love.keypressed(key)	
-	screens[screen_selected]:keypressed(key, 'down', 'up', 'right', 'left', 'x')
-	
+function love.keypressed(key)
 	if game.play then
-		snake:control(key)
+		game:keypressed(key, "s", "w", "a", "d")
 	else
-		--~ options:keypressed(key, "s", "w", "d", "a", "x")
+		Screens[curScreen]:keypressed(key, "s", "w", "a", "d", "x")
 	end
-		
+	
 	if key == 'f1' then
 		love.event.quit('restart')
 	end
 	
 	if key == 'f2' then
-		local fullscreen, fstype = love.window.getFullscreen( )
-		
-		SetFullscreenMode(not fullscreen)
+		local fullscreen = love.window.getFullscreen( )
+		love.window.setFullscreen(not fullscreen)
+		local newW, newH = love.graphics.getDimensions() 
+		local scaleW, scaleH = funct.scaler(state.BASIC_W, state.BASIC_H, newW, newH)
+
+		state.scaleW, state.scaleH = scaleW, scaleH
 	end
 	
 	if key == 'escape' then
@@ -123,20 +59,14 @@ function love.keypressed(key)
 	end
 	
 	if key == 'f12' then
-		if dbg.show then
-			dbg.show = false
-		else
-			dbg.show = true
-		end
+		visDbg = not visDbg
 	end
 end
 
+function love.resize()
+	
+end
+
 function love.quit()
-	local best = ""
-	
-	for l = 1, #levels do
-		best = best..tostring(game.highscores[l]).."\n"
-	end
-	
-	love.filesystem.write( "highscores.txt", best)
+	game:quit()
 end
