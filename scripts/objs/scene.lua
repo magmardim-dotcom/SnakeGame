@@ -1,4 +1,5 @@
 local scene = {}
+
 local Enemy = require "scripts/objs/enemy"
 local Snake = require "scripts/objs/snake"
 local Path = require "scripts/objs/path"
@@ -10,7 +11,7 @@ function scene:load(lvl, game)
 	self.level = require ("levels/"..lvl)
 	
 	local start = self.level.start
-	self.player = Snake:new(self, start.x, start.y, start.dx, start.dy, game.initalLength)
+	self.player = Snake:new(self, start.x, start.y, start.dx, start.dy, game.initalLength, game.player.functCollision)
 	self.apples = {}
 		table.insert(self.apples, Apple:new(self))
 		

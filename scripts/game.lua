@@ -22,9 +22,12 @@ function game:load()
 	
 	self.lvl = 1
 	self.font = love.graphics.newFont(state.BASIC_FONT, state.FONT2_SIZE, "normal", 2)
-	self.playerControl = {
+	
+	self.player = {}
+	self.player.control = {
 		up = "w", down = "s", left = "a", right = "d"
 	}
+	self.player.functCollision = function() self:faled() end
 		
 	if love.filesystem.getInfo("highscores.txt") then
 		local l = 1
@@ -42,6 +45,8 @@ function game:load()
 	self.music = Music["track1.ogg"]
 	love.audio.setEffect("reverb", {type="reverb", diffusion = 1, density = 1, gain = 1, roomrolloff = 10})
 	love.audio.setVolume(state.musicVol)
+	
+	self.shake = Modules.Shake
 end
 
 function game:sceneLoad(lvl)
@@ -60,12 +65,15 @@ function game:draw(palette)
 	local level = self.levels[self.lvl] 
 	local scale = math.min(state.scaleW, state.scaleH)
 	local widthScene = #self.scene.level[1] * state.CELL * scale
+	local heightScene = #self.scene.level * state.CELL * scale
 	local indentX = widthScene <= love.graphics.getWidth() and (love.graphics.getWidth() - widthScene)/2 or 0
 	local indentY = state.MENU_HEIGHT * state.scaleH
 
 	love.graphics.push()
 	love.graphics.translate(indentX, indentY)
+	self.shake:push()
 	self.scene:draw(palette)
+	self.shake:pop()
 	love.graphics.pop()
 		
 	self:drawTopMenu(palette)
@@ -73,6 +81,8 @@ end
 
 function game:update(dt)
 	self.scene:update(dt)
+	self.shake:update(dt)
+	
 	if not self.play then return false end	
 	
 	if self.hunger then		
@@ -100,6 +110,8 @@ function game:faled()
 		self.highscores[self.lvl] = self.score
 	end
 	
+	self.shake:start(0.1, 10, 3)
+	
 	return false
 end
 
@@ -118,7 +130,7 @@ function game:restart()
 end
 
 function game:keypressed(key, down, up, right, left)
-	self.scene:keypressed(key, self.playerControl)
+	self.scene:keypressed(key, self.player.control)
 end
 
 function game:quit()

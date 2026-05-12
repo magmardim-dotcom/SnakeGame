@@ -1,7 +1,7 @@
 local Snake = {}
 	Snake.__index = Snake
 
-function Snake:new(scene, x, y, dx, dy, size)
+function Snake:new(scene, x, y, dx, dy, size, fc)
 	local snake = {}
 		snake.x = x 
 		snake.y = y
@@ -12,6 +12,7 @@ function Snake:new(scene, x, y, dx, dy, size)
 		snake.points = {}
 			for i = 1, size do table.insert(snake.points, {x = x - i*dx, y = y}) end
 		snake.path = {}
+		snake.functCollision = fc or function() end
 			
 	return setmetatable(snake, self)
 end
@@ -140,7 +141,7 @@ function Snake:collision()
 	for i = 2, #self.points do
 		local p = self.points[i]
 		if head.x + self.dx == p.x and head.y + self.dy == p.y then
-			scene.game:faled()
+			self.functCollision()
 			return true
 		end
 	end
