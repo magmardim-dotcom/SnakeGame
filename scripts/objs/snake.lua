@@ -71,6 +71,8 @@ function Snake:update(dt, apples)
 		table.remove(self.moves, 1)
 	end
 	
+	
+	
 end
 
 function Snake:move(apples)
@@ -95,14 +97,12 @@ function Snake:move(apples)
 	table.insert(self.points, 1, {x = x, y = y})
 end
 
-function Snake:eat(apples, funct)
+function Snake:eat(apples)
 	local head = self.points[1]
 		
 	for n, s in ipairs(apples) do
 		if head.x == s.x and head.y == s.y then
-			
-			table.remove(apples, n)
-				funct()		
+			table.remove(apples, n)		
 			return true
 		end
 	end
@@ -114,7 +114,6 @@ end
 function Snake:control(key, up, down, left, right)
 	if #self.moves > 2 then return end
 	
-	--~ if key == self.keys.up or key == self.keys.down or key == self.keys.left or key == self.keys.right then
 	if key == up or key == down or key == left or key == right then
 	
 		local move = ""
@@ -136,21 +135,25 @@ end
 
 function Snake:collision()
 	local head = self.points[1]
-	local scene = self.scene 
-	
-	for i = 2, #self.points do
-		local p = self.points[i]
-		if head.x + self.dx == p.x and head.y + self.dy == p.y then
-			self.functCollision()
-			return true
-		end
-	end
 
-	local level = scene.level
+	local level = self.scene:getObstacles()
 	
 	if level[head.y + self.dy] and level[head.y + self.dy][head.x + self.dx] == 1 then
-		self.scene.game:faled()
+		self.functCollision()
 		return true
+	end
+	
+	return false
+end
+
+function Snake:damageCollision()
+	local head = self.points[1]
+	local enemy = self.scene.enemy
+	
+	for _, e in ipairs(enemy) do
+		if head.x == e.x and head.y == e.y then
+			return true
+		end
 	end
 	
 	return false

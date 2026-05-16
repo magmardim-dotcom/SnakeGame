@@ -9,6 +9,7 @@ local Apple = require "scripts/objs/apples"
 	
 function scene:load(lvl, game)
 	self.level = require ("levels/"..lvl)
+	self.level.enemy = {}
 	
 	local start = self.level.start
 	self.player = Snake:new(self, start.x, start.y, start.dx, start.dy, game.initalLength, game.player.functCollision)
@@ -28,6 +29,15 @@ function scene:load(lvl, game)
 					local x,y = (x-1)*self.cell, (y-1)*self.cell
 
 					love.graphics.rectangle('fill', x, y, self.cell, self.cell)
+				elseif b > 1 then
+					local ed = {
+						[3] = {dx = 1, dy = 0},
+						[4] = {dx = -1, dy = 0},
+						[5] = {dx = 0, dy = -1},
+						[6] = {dx = 0, dy = 1},
+					}
+					local enemy = {x = x, y = y, dx = ed[b].dx, dy = ed[b].dy}
+					table.insert(self.level.enemy, enemy)
 				end
 			end
 		end
@@ -46,6 +56,13 @@ end
 function scene:restart()
 	local start = self.level.start
 	self.player:load(start.x, start.y, start.dx, start.dy, self.game.initalLength, self)
+	self.enemy = {}
+	if self.level.enemy then
+		for v, e in ipairs(self.level.enemy) do
+			local enemy = Enemy:new(e.x, e.y, e.dx, e.dy, self)
+			self.enemy[v] = enemy
+		end
+	end
 end
 
 local function getViewOffset(scene, oy)
@@ -111,35 +128,48 @@ function scene:update(dt)
 	
 	if not self.game.play then return false end
 	if self.game.delay % (13 - game.speed) == 0 then
-		for _, e in ipairs(self.enemy) do
-			e:update(dt)
+					
+		self.player:update(dt, self.apples)	
+		
+		if self.player:damageCollision() then
+			game.shake:start(0.1, 1, 1)
+			game:getDamage()
 		end
-		self.player:update(dt, self.apples)		
-		self.player:eat(self.apples, 
-			function()
-				local add = 20 - (20 - game.lifes[game.life])
-							
-				game.score = game.score + game.add_points
-							
-				if game.life < 6 then
-					game.lifes[game.life] = 20
-					game.life = game.life + 1
-					game.lifes[game.life] = add
-				else
-					game.lifes[game.life] = 20
-				end
 				
-				table.insert(self.apples, Apple:new(self))
-			
-				game.audio.eat:setPitch(0.6 + math.random(1, 80)/100)
-				game.audio.eat:play()
-			
-				if Screens.faled.game_over[game.score/1000] then 
-					Screens.faled.msg = Screens.faled.game_over[game.score/1000]
-				end
+		for _, e in ipairs(self.enemy) do
+			e:update(dt, self.player)
+		end	
+		
+		if self.player:damageCollision() then
+			game.shake:start(0.1, 1, 1)
+			game:getDamage()
+		end
+		
+		if self.player:eat(self.apples) then 
+			local add = 20 - (20 - game.lifes[game.life])
+							
+			game.score = game.score + game.add_points
+							
+			if game.life < 6 then
+				game.lifes[game.life] = 20
+				game.life = game.life + 1
+				game.lifes[game.life] = add
+			else
+				game.lifes[game.life] = 20
 			end
-		)
+				
+			table.insert(self.apples, Apple:new(self))
+			
+			game.audio.eat:setPitch(0.6 + math.random(1, 80)/100)
+			game.audio.eat:play()
+			
+			if Screens.faled.game_over[game.score/1000] then 
+				Screens.faled.msg = Screens.faled.game_over[game.score/1000]
+			end
+		end
 	end	
+	
+	
 end
 
 function scene:getObstacles()

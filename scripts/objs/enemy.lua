@@ -64,25 +64,24 @@ end
 	--~ end	
 --~ end
 
-function Enemy:update(dt, speed)	
-	local level = self.scene.level
-	local y = self.y + self.dy
-	local x = self.x + self.dx
-	
-	table.insert(self.last, {x = self.x, y = self.y, a = 1})
-	
-	if level[self.y] and level[self.y][x] == 1 then
-		self.dx = -self.dx
-	else
-		self.x = self.x + self.dx
-	end
-	
-	if level[y] and level[y][self.x] == 1 then
-		self.dy = -self.dy
-	else
-		self.y = self.y + self.dy
-	end	
+function Enemy:update(dt, snake)
+    local level = self.scene.level
+    local nextX = self.x + self.dx
+    local nextY = self.y + self.dy
+    
+    table.insert(self.last, {x = self.x, y = self.y, a = 1})
+
+    if level[self.y] and level[self.y][nextX] == 1 then
+        self.dx = -self.dx
+    end
+    
+    if level[nextY] and level[nextY][self.x] == 1 then
+        self.dy = -self.dy
+    end
+    
+    self.x, self.y = nextX, nextY 
 end
+
 
 function Enemy:move()
 	

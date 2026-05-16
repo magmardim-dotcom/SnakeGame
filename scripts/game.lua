@@ -20,7 +20,7 @@ function game:load()
 	self.initalLength = 4
 	self.max_apples = 1
 	
-	self.lvl = 1
+	self.lvl = 4
 	self.font = love.graphics.newFont(state.BASIC_FONT, state.FONT2_SIZE, "normal", 2)
 	
 	self.player = {}
@@ -40,13 +40,27 @@ function game:load()
 	
 	self.audio = {
 		eat = Audio['eat.ogg'],
-		over = Audio['end.ogg']
+		over = Audio['end.ogg'],
+		damage = Audio['damage.ogg']
 	}
 	self.music = Music["track1.ogg"]
 	love.audio.setEffect("reverb", {type="reverb", diffusion = 1, density = 1, gain = 1, roomrolloff = 10})
 	love.audio.setVolume(state.musicVol)
 	
 	self.shake = Modules.Shake
+	
+	self.getDamage = function()
+		self.audio.damage:play()
+		if self.life > 1 then
+			local damage = 20 - self.lifes[self.life]
+			self.life = self.life - 1
+			self.lifes[self.life] = self.lifes[self.life] - damage
+		else
+			self:faled()
+			self.life = 1
+			self.lifes[self.life] = 0
+		end
+	end
 end
 
 function game:sceneLoad(lvl)
@@ -110,7 +124,7 @@ function game:faled()
 		self.highscores[self.lvl] = self.score
 	end
 	
-	self.shake:start(0.1, 10, 3)
+	self.shake:start(0.5, 10, 3)
 	
 	return false
 end
