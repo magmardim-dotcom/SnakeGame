@@ -1,9 +1,10 @@
 local Title = Modules.Menu:new({
 	offsetY = 300,
+	width = state.BASIC_W,
+	height = state.BASIC_H,
 	strings = {
 		[1] = {nam = "Играть", 
 				act = function() 
-					--~ game:restart()
 					funct.switchScreen('options') 
 				end},
 		[2] = {nam = "Настройки", 

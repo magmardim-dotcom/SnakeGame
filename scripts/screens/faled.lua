@@ -1,32 +1,25 @@
 local Faled = Modules.Menu:new({
-	offsetY = 200,
-	y = 180,
-	x = 200,
+	offsetY = 100,
+	y = 80,
+	x = 260,
 	item = 5,
 	width = 600,
-	height = 340,
+	height = 390,
 	strings = {
 		[1] = {
 			nam = function(s)
-				return "Твой счет: "..s.game.score
+				return s.msg.."\nТвой счет: "..s.game.score
 			end,
-			skip = true
-		},
-		[2] = {
-			nam = function(s)
-				return s.msg
-			end,
-			skip = true
-		},
+			skip = true},
+		[2] = 'skip',
 		[3] = 'skip',
-		[4] = 'skip',
+		[4] = "skip",
 		[5] = {
 			nam = "повторить", 
 			act = function(s) 
 				s.game:restart() 
 				s.item = 5
 			end},
-			
 		[6] = {
 			nam = "назад", 
 			act = function(s) 

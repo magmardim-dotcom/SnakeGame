@@ -15,11 +15,12 @@ function Apple:move_random(scene)
 	return x, y
 end
 
-function Apple:new(scene)
+function Apple:new(scene, act)
 	local apple = {}
 		apple.x, apple.y = self:move_random(scene)	
 		apple.r = 0
 		apple.angle = math.pi/2
+		apple.activate = act
 	return setmetatable(apple, self)
 end
 
@@ -28,18 +29,31 @@ function Apple:draw(color, cell)
 	local center = cell/2
 	local s = self
 	local x,y = (s.x-1)*cell, (s.y-1)*cell
+	local scale = math.min(state.scaleW, state.scaleH)
 		
-	love.graphics.push()
-	love.graphics.setColor(color)
+	love.graphics.push()	
 	love.graphics.translate(x + center, y + center)
 	love.graphics.rotate(s.r)
-	love.graphics.rectangle('fill', -size/2, -size/2, size, size)
+	if self.activate then
+		love.graphics.setColor(color)
+		love.graphics.rectangle('fill', -size/2, -size/2, size, size)
+	else
+		love.graphics.setLineWidth(2 * scale)
+		love.graphics.setColor(color[1], color[2], color[3], 0.5)
+		love.graphics.rectangle('line', -size/2, -size/2, size, size)
+	end
 	love.graphics.pop()
 
 end
 
 function Apple:update(dt)
 	self.r = self.r + self.angle*dt
+end
+
+function Apple:act()
+	self.activate = true
+	
+	return true
 end
 
 return Apple

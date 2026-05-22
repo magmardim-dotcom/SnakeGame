@@ -37,7 +37,8 @@ function Snake:draw(color, cell)
 		
 		love.graphics.push()
 			love.graphics.setColor(color[1],color[2],color[3],1.1-l*i)
-			love.graphics.rectangle('fill', (p.x-1)*cell, (p.y-1)*cell, cell*0.9, cell*0.9)
+			love.graphics.translate(cell*0.1, cell*0.1)
+			love.graphics.rectangle('fill', (p.x-1)*cell, (p.y-1)*cell, cell*0.8, cell*0.8)
 		love.graphics.pop()
 	end
 end
@@ -70,12 +71,9 @@ function Snake:update(dt, apples)
 		
 		table.remove(self.moves, 1)
 	end
-	
-	
-	
 end
 
-function Snake:move(apples)
+function Snake:move()
 	local head = self.points[1]
 	local w = #self.scene.level[1]
 	local h = #self.scene.level	
@@ -101,7 +99,7 @@ function Snake:eat(apples)
 	local head = self.points[1]
 		
 	for n, s in ipairs(apples) do
-		if head.x == s.x and head.y == s.y then
+		if head.x == s.x and head.y == s.y and s.activate then
 			table.remove(apples, n)		
 			return true
 		end
@@ -117,6 +115,8 @@ function Snake:control(key, up, down, left, right)
 	if key == up or key == down or key == left or key == right then
 	
 		local move = ""
+		local head = self.points[1]
+		local level = self.scene:getObstacles()
 		
 		if key == up then
 			move = "up"

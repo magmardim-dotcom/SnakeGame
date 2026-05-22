@@ -9,7 +9,7 @@ function game:load()
 	self.score = 0
 	self.add_points = 100
 	self.best = 0	
-	self.speed = 7		
+	self.speed = 5		
 	self.highscores = {}	
 		for l = 1, #self.levels do self.highscores[l] = 0 end
 	self.hunger = true
@@ -160,13 +160,16 @@ end
 function game:drawTopMenu(palette, font)	
 	local scaleW, scaleH = state.scaleW, state.scaleH
 	local scale = math.min(scaleW, scaleH)
-	local indentX = 10
-	local indentY = 10
+	local indentX = 50
+	local indentY = (state.MENU_HEIGHT - self.font:getHeight())/2
 	
 	love.graphics.push()
-	love.graphics.setColor(state.BG_COLOR)
-	love.graphics.rectangle('fill', 0,0,love.graphics.getWidth(), state.MENU_HEIGHT * scaleH)
-	love.graphics.setColor(palette[2])
+	love.graphics.setColor(palette[1])
+	love.graphics.rectangle('fill', 0,0, love.graphics.getWidth(), state.MENU_HEIGHT * scaleH)
+	love.graphics.setColor(palette[3])
+	love.graphics.setLineWidth(4 * scale)
+	love.graphics.rectangle('line', 0,0, love.graphics.getWidth(), state.MENU_HEIGHT * scaleH)
+	love.graphics.setColor(palette[3])
 	love.graphics.setFont(self.font)
 	love.graphics.scale(scale)
 	
@@ -177,24 +180,24 @@ function game:drawTopMenu(palette, font)
 		self.highscores[self.lvl] or 0
 	)
 		
-	love.graphics.printf(score, indentX, indentY, love.graphics.getWidth(), "left")
-	love.graphics.printf(best, 0, indentY, (love.graphics.getWidth()/scale)-indentX, "right")
+	love.graphics.printf(score, indentX, indentY, love.graphics.getWidth() - indentX, "left")
+	love.graphics.printf(best, 0, indentY, (love.graphics.getWidth()/scaleW) - indentX, "right")
 	love.graphics.pop()
 	
 	love.graphics.push()
 		local offset = 10 * scaleH		
-		local indentY = ((state.MENU_HEIGHT * scaleH) - state.CELL)/2
+		local indentY = ((state.MENU_HEIGHT) - state.CELL)/2
 		love.graphics.translate(450*scaleW, indentY*scaleH)
 		
 		for l = 1, self.life do		
-			local siz = self.lifes[l] * scale
-			love.graphics.setColor(palette[3])
+			local siz = self.lifes[l] * (state.CELL/20) * scale
+			love.graphics.setColor(palette[4])
 			love.graphics.rectangle('fill', (l-1) * (state.CELL + offset), 0, siz, state.CELL * scale)
 		end
 		for b = 1, self.max_life do
 			local siz = state.CELL * scale
-			love.graphics.setColor(0,0,0)
-			love.graphics.setLineWidth(1 * scaleH)
+			love.graphics.setColor(palette[4][1], palette[4][2], palette[4][3], 0.5)
+			love.graphics.setLineWidth(2 * scale)
 			love.graphics.rectangle('line', (b-1) * (state.CELL + offset), 0, siz, state.CELL * scale)
 		end
 	love.graphics.pop()			

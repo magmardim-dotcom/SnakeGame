@@ -1,5 +1,5 @@
 local dbg = require "scripts/dbg"
-	visDbg = true
+	visDbg = false
 
 funct = require "scripts/functions" 
 state = require "scripts/state"
@@ -18,17 +18,23 @@ function love.load()
 	Screens = funct.loadScripts("scripts/screens")
 		curScreen = 'title'
 	
+	if love.system.getOS() == "Android" or love.system.getOS() == "Linux" then
+		funct.fullScreen(true)
+	end
 end
 
 function love.draw()
 	local palette = PaletteList[state.palette]
+	
+	love.graphics.setDefaultFilter("nearest")
+	love.graphics.setBackgroundColor(palette[3])
 	
 	if curScreen == "faled"  then
 		game:draw(palette)
 	end
 	
 	if not game.play then
-		Screens[curScreen]:draw(palette[1], palette[2], palette[3], Font)
+		Screens[curScreen]:draw(palette[1], palette[2], palette[3], palette[4], Font)
 	end
 		
 	if visDbg then dbg:draw(30, 50) end
@@ -63,12 +69,6 @@ function love.keypressed(key)
 	end
 end
 
-function love.resize()
-	local newW, newH = love.graphics.getDimensions() 
-	local scaleW, scaleH = funct.scaler(state.BASIC_W, state.BASIC_H, newW, newH)
-	state.scaleW, state.scaleH = scaleW, scaleH
-end
-
 function love.quit()
 	game:quit()
 	funct.saveState(
@@ -78,6 +78,17 @@ function love.quit()
 			['musicPlay'] = state.musicPlay,
 			['musicVol'] = state.musicVol,
 		}
-	)
+	)	
+end
+
+function love.resize(w, h)
+	local width, height = love.window.getDesktopDimensions() 
 	
+	if w > width and h > height then
+		state.BASIC_W, state.BASIC_H = w, h
+	end
+end
+
+function love.touchpressed(id, x, y, dx, dy, pressure)
+	Screens[curScreen]:touchpressed()
 end

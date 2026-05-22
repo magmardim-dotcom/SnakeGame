@@ -16,14 +16,14 @@ function Menu:new(menu)
 	return setmetatable(menu, self)
 end
 
-function Menu:draw(color1, color2, color3, font)
+function Menu:draw(color1, color2, color3, color4, font)
 	local width = self.width
 	local height = self.height
 	
 	love.graphics.push()
 	love.graphics.setColor(color1)
 	love.graphics.rectangle('fill', self.x * state.scaleW, self.y * state.scaleH, width * state.scaleW, height * state.scaleH)
-	love.graphics.setColor(color2)
+	love.graphics.setColor(color3)
 	love.graphics.setLineWidth(10)
 	love.graphics.rectangle('line', self.x * state.scaleW, self.y * state.scaleH, width * state.scaleW, height * state.scaleH)
 	love.graphics.pop()
@@ -49,7 +49,7 @@ function Menu:draw(color1, color2, color3, font)
 				if s.color then
 					love.graphics.setColor(s.color)
 				else
-					love.graphics.setColor(color3)
+					love.graphics.setColor(color4)
 				end
 			end
 			return nam
@@ -105,6 +105,14 @@ function Menu:keypressed(key, down, up, left, right, restart)
 	
 	if s.left and key == left then
 		s.left(self)
+	end
+end
+
+function Menu:touchpressed()
+	local s = self.strings[self.item]
+	
+	if s.act then
+		s.act(self)
 	end
 end
 

@@ -56,12 +56,10 @@ function funct.switchScreen(to)
 end
 
 function funct.fullScreen(bul)
-	local fullscreen = love.window.getFullscreen( )	
+	state.fullScreen = bul
+	love.window.setFullscreen(bul)
 	local newW, newH = love.graphics.getDimensions() 
 	local scaleW, scaleH = funct.scaler(state.BASIC_W, state.BASIC_H, newW, newH)
-	
-	state.fullScreen = not state.fullScreen
-	love.window.setFullscreen(state.fullScreen)
 	state.scaleW, state.scaleH = scaleW, scaleH
 end
 

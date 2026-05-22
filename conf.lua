@@ -6,7 +6,7 @@ function love.conf(t)
 
     t.window.title = "Snake"
     t.window.icon = nil
-    t.window.width = 1000
+    t.window.width = 1120
     t.window.height = 640
     t.window.resizable = false
     t.window.fullscreen = false

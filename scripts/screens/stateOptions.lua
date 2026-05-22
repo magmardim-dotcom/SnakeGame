@@ -1,6 +1,8 @@
 return Modules.Menu:new(
 	{
 		offsetY = 150,
+		width = state.BASIC_W,
+		height = state.BASIC_H,
 		strings = {
 		[1] = {
 			nam = function(s)

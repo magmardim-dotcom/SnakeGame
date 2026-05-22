@@ -1,10 +1,12 @@
 local GO = {
-	offsetY = 150,
+	offsetY = 100,
+	width = state.BASIC_W,
+	height = state.BASIC_H,
 	speed = {
 		i = 2,
-		[1] = {s = 5, nam = "медлено"},
-		[2] = {s = 7, nam = "норма"},
-		[3] = {s = 10, nam = "быстро"},
+		[1] = {s = 3, nam = "медлено"},
+		[2] = {s = 5, nam = "норма"},
+		[3] = {s = 7, nam = "быстро"},
 	},
 	strings = {
 		[1] = {

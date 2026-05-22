@@ -14,7 +14,8 @@ function scene:load(lvl, game)
 	local start = self.level.start
 	self.player = Snake:new(self, start.x, start.y, start.dx, start.dy, game.initalLength, game.player.functCollision)
 	self.apples = {}
-		table.insert(self.apples, Apple:new(self))
+		table.insert(self.apples, Apple:new(self, true))
+		table.insert(self.apples, Apple:new(self, false))
 		
 	local lvlW, lvlH = #self.level[1], #self.level
 	self.cell = state.CELL
@@ -91,19 +92,28 @@ local function getViewOffset(scene, oy)
     return offsetX, offsetY
 end
 
-function scene:draw(palette) 
-	local width = #self.level[1]
-	local height = #self.level
+function scene:draw(palette) 	
 	local scale = math.min(state.scaleW, state.scaleH)
+	local width = #self.level[1] * scale * state.CELL
+	local height = #self.level * scale * state.CELL
 	
 	love.graphics.push()
 		local ox, oy = getViewOffset(self, state.MENU_HEIGHT * state.scaleH)
-		love.graphics.translate(-ox, -oy)
 		love.graphics.setColor(palette[1])
-		love.graphics.rectangle('fill', 0,0, width * self.cell * scale, height * self.cell * scale)	
+		love.graphics.rectangle('fill', 0,0, width, height)
+		
+		love.graphics.translate(-ox, -oy)	
+		love.graphics.setColor(palette[3][1], palette[3][2], palette[3][3], 0.02)
+		love.graphics.setLineWidth(1*scale)
+		love.graphics.setLineStyle("rough")
+		for y = 1, #self.level do
+			for x = 1, #self.level[1] do
+				love.graphics.rectangle('line', (x-1) * scale * state.CELL, (y-1) * scale * state.CELL, self.cell * scale, self.cell * scale)
+			end
+		end		
 		love.graphics.setColor(palette[2])
 		love.graphics.draw(self.canvas, 0, 0, 0, scale, scale)
-				
+					
 		for _, e in ipairs(self.enemy) do
 			e:draw(palette[2], self.cell * scale)
 		end
@@ -157,8 +167,8 @@ function scene:update(dt)
 			else
 				game.lifes[game.life] = 20
 			end
-				
-			table.insert(self.apples, Apple:new(self))
+			self.apples[1]:act()
+			table.insert(self.apples, Apple:new(self, false))
 			
 			game.audio.eat:setPitch(0.6 + math.random(1, 80)/100)
 			game.audio.eat:play()

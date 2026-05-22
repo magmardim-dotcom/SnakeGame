@@ -7,14 +7,15 @@ function dbg:getStatus()
 	local memory = string.format('%.0f', tostring(collectgarbage('count')))
 	local w, h = love.graphics.getDimensions() 
 	
-	return ("FPS: " .. fps .. "\n" ..
+	return ("OS is " .. love.system.getOS() .. "\n" ..
+			"FPS: " .. fps .. "\n" ..
 			"Memory: "..memory .. "\n" ..
 			"Draw Calls: " .. stats.drawcalls .. "\n" ..
 			"Textures: " .. stats.images .. "\n" ..
 			"Texture Mem: " .. math.floor(stats.texturememory / 1024) .. " KB" .. "\n" ..
 			"Fonts: " .. stats.fonts .. "\n" ..
 			"Canvas: " .. stats.canvases .. "\n"..
-			"Width: "..w.." Height: "..h
+			"Width: ".. w .." Height: ".. h .. "\n"
 			)
 end
 
