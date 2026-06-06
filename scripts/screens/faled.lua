@@ -2,9 +2,11 @@ local Faled = Modules.Menu:new({
 	offsetY = 100,
 	y = 80,
 	x = 260,
-	item = 5,
+	item = 6,
 	width = 600,
-	height = 390,
+	height = 440,
+	font = love.graphics.newFont(state.BASIC_FONT, state.FONT_SIZE - 10, "normal", 4),
+	frame = true,
 	strings = {
 		[1] = {
 			nam = function(s)
@@ -14,20 +16,21 @@ local Faled = Modules.Menu:new({
 		[2] = 'skip',
 		[3] = 'skip',
 		[4] = "skip",
-		[5] = {
+		[5] = "skip",
+		[6] = {
 			nam = "повторить", 
 			act = function(s) 
-				s.game:restart() 
-				s.item = 5
+				s.game:restart(s.game.mode) 
+				s.item = 6
 			end},
-		[6] = {
+		[7] = {
 			nam = "назад", 
 			act = function(s) 
 				funct.switchScreen('options') 
 				s.game.music:setVolume(state.musicVol)
-				s.game.music:stop()
+				s.game:stopMusic()
 				s.game.music:setEffect("reverb", false)
-				s.item = 5	 
+				s.item = 6	 
 			end},
 	},
 	game_over = {

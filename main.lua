@@ -12,26 +12,31 @@ function love.load()
 	Music = funct.loadAudio("resurses/music")
 	PaletteList = require "scripts/palette-list"
 	Modules = funct.loadScripts("scripts/modules") 
-	state = funct.loadState(state) 
-	game:load()
+	state = funct.loadState(state) 	
 	Modules.Menu.game = game
 	Screens = funct.loadScripts("scripts/screens")
+	game:load()
 		curScreen = 'title'
-	
-	if love.system.getOS() == "Android" or love.system.getOS() == "Linux" then
+	if love.system.getOS() == "Android" then
 		funct.fullScreen(true)
 	end
 end
 
 function love.draw()
 	local palette = PaletteList[state.palette]
+	local h = love.graphics.getHeight() 
+	local scale = math.min(state.scaleW, state.scaleH)
+	local offsetY = (h - (state.BASIC_H*scale))/2 
 	
 	love.graphics.setDefaultFilter("nearest")
 	love.graphics.setBackgroundColor(palette[3])
 	
+	love.graphics.push()
+	love.graphics.translate(0, offsetY)
 	if curScreen == "faled"  then
 		game:draw(palette)
 	end
+	love.graphics.pop()
 	
 	if not game.play then
 		Screens[curScreen]:draw(palette[1], palette[2], palette[3], palette[4], Font)

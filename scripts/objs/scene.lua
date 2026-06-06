@@ -12,10 +12,13 @@ function scene:load(lvl, game)
 	self.level.enemy = {}
 	
 	local start = self.level.start
-	self.player = Snake:new(self, start.x, start.y, start.dx, start.dy, game.initalLength, game.player.functCollision)
+	self.game.player.snake = Snake:new(self, start.x, start.y, start.dx, start.dy, game.initalLength, game.player.functCollision)
 	self.apples = {}
 		table.insert(self.apples, Apple:new(self, true))
 		table.insert(self.apples, Apple:new(self, false))
+		if self.game.mode == "fight" then
+			self.apples[2]:act()
+		end	
 		
 	local lvlW, lvlH = #self.level[1], #self.level
 	self.cell = state.CELL
@@ -52,17 +55,42 @@ function scene:load(lvl, game)
 		end
 	end	
 	
+	self.player1 = {}
+	self.player1.control = {
+		up = "w", down = "s", left = "a", right = "d"
+	}
+	self.player1.functCollision = function()
+		self.game:faled()
+		self.score[2] = self.score[2] + 1
+	end
+	self.player1.snake = Snake:new(self, 13, 15, 1, 0, 7, self.player1.functCollision)
+		
+	self.player2 = {}
+	self.player2.control = {
+		up = "up", down = "down", left = "left", right = "right"
+	}
+	self.player2.functCollision = function()
+		self.game:faled()
+		self.score[1] = self.score[1] + 1
+	end
+	self.player2.snake = Snake:new(self, 42, 15, -1, 0, 7, self.player2.functCollision)
+	self.score = {0, 0}
 end
 
-function scene:restart()
-	local start = self.level.start
-	self.player:load(start.x, start.y, start.dx, start.dy, self.game.initalLength, self)
-	self.enemy = {}
-	if self.level.enemy then
-		for v, e in ipairs(self.level.enemy) do
-			local enemy = Enemy:new(e.x, e.y, e.dx, e.dy, self)
-			self.enemy[v] = enemy
+function scene:restart(mode)
+	if mode == "game" then
+		local start = self.level.start
+		self.game.player.snake:load(start.x, start.y, start.dx, start.dy, self.game.initalLength, self)
+		self.enemy = {}
+		if self.level.enemy then
+			for v, e in ipairs(self.level.enemy) do
+				local enemy = Enemy:new(e.x, e.y, e.dx, e.dy, self)
+				self.enemy[v] = enemy
+			end
 		end
+	elseif mode == "fight" then
+		self.player1.snake = Snake:new(self, 13, 15, 1, 0, 7, self.player1.functCollision)
+		self.player2.snake = Snake:new(self, 42, 15, -1, 0, 7, self.player2.functCollision)
 	end
 end
 
@@ -70,7 +98,7 @@ local function getViewOffset(scene, oy)
     local WIDTH = love.graphics.getWidth()
     local HEIGHT = love.graphics.getHeight()
     local cell = state.CELL * math.min(state.scaleW, state.scaleH)
-    local snake = scene.player
+    local snake = scene.game.player.snake
     local game = scene.game
     
     local headX = snake.points[1].x * cell
@@ -113,20 +141,34 @@ function scene:draw(palette)
 		end		
 		love.graphics.setColor(palette[2])
 		love.graphics.draw(self.canvas, 0, 0, 0, scale, scale)
-					
+		
 		for _, e in ipairs(self.enemy) do
 			e:draw(palette[2], self.cell * scale)
 		end
+			
 		for _, a in ipairs(self.apples) do
 			a:draw(palette[3], self.cell * scale)
 		end
-		
-		self.player:draw(palette[4], self.cell * scale)
+			
+		if self.game.mode == "game" then	
+			self.game.player.snake:draw(palette[4], self.cell * scale)
+		elseif self.game.mode == "fight" then
+			self.player1.snake:draw(palette[4], self.cell * scale)
+			self.player2.snake:draw(palette[3], self.cell * scale)
+		end
 	love.graphics.pop()
 end
 
 function scene:keypressed(key, control)
-	self.player:control(key, control.up, control.down, control.left, control.right)
+	if self.game.mode == "game" then
+		self.game.player.snake:control(key, control.up, control.down, control.left, control.right)
+	elseif self.game.mode == "fight" then
+		local player1 = self.player1
+		local player2 = self.player2
+		
+		player1.snake:control(key, player1.control.up, player1.control.down, player1.control.left, player1.control.right)
+		player2.snake:control(key, player2.control.up, player2.control.down, player2.control.left, player2.control.right)
+	end
 end
 
 function scene:update(dt)
@@ -136,55 +178,77 @@ function scene:update(dt)
 		a:update(dt)
 	end
 	
-	if not self.game.play then return false end
-	if self.game.delay % (13 - game.speed) == 0 then
-					
-		self.player:update(dt, self.apples)	
-		
-		if self.player:damageCollision() then
-			game.shake:start(0.1, 1, 1)
-			game:getDamage()
-		end
+	if not self.game.play then return false end	
+	if game.mode == "game" then
+		local player = self.game.player.snake
 				
-		for _, e in ipairs(self.enemy) do
-			e:update(dt, self.player)
+		
+		if self.game.delay % (13 - game.speed) == 0 then
+						
+			player:update(dt, self.apples)	
+			
+			if player:damageCollision() then
+				game.shake:start(0.1, 1, 1)
+				game:getDamage()
+			end
+					
+			for _, e in ipairs(self.enemy) do
+				e:update(dt, player)
+			end	
+			
+			if player:damageCollision() then
+				game.shake:start(0.1, 1, 1)
+				game:getDamage()
+			end
+			
+			if player:eat(self.apples) then 
+				local add = 20 - (20 - game.lifes[game.life])
+							
+				game.score = game.score + game.add_points
+								
+				if game.life < 6 then
+					game.lifes[game.life] = 20
+					game.life = game.life + 1
+					game.lifes[game.life] = add
+				else
+					game.lifes[game.life] = 20
+				end
+				self.apples[1]:act()
+				table.insert(self.apples, Apple:new(self, false))
+				
+				game.audio.eat:play()
+				
+				if Screens.faled.game_over[game.score/1000] then 
+					Screens.faled.msg = Screens.faled.game_over[game.score/1000]
+				end
+			end
 		end	
-		
-		if self.player:damageCollision() then
-			game.shake:start(0.1, 1, 1)
-			game:getDamage()
-		end
-		
-		if self.player:eat(self.apples) then 
-			local add = 20 - (20 - game.lifes[game.life])
-							
-			game.score = game.score + game.add_points
-							
-			if game.life < 6 then
-				game.lifes[game.life] = 20
-				game.life = game.life + 1
-				game.lifes[game.life] = add
-			else
-				game.lifes[game.life] = 20
-			end
-			self.apples[1]:act()
-			table.insert(self.apples, Apple:new(self, false))
+	elseif game.mode == "fight" then
+		if self.game.delay % (13 - game.speed) == 0 then
+			local player1 = self.player1.snake
+			local player2 = self.player2.snake
 			
-			game.audio.eat:setPitch(0.6 + math.random(1, 80)/100)
-			game.audio.eat:play()
+			player1:update(dt, self.apples)
+			player2:update(dt, self.apples)
 			
-			if Screens.faled.game_over[game.score/1000] then 
-				Screens.faled.msg = Screens.faled.game_over[game.score/1000]
+			if player1:eat(self.apples) then
+				table.insert(self.apples, Apple:new(self, true))
+				game.audio.eat:play()
 			end
+			
+			if player2:eat(self.apples) then
+				table.insert(self.apples, Apple:new(self, true))
+				game.audio.eat:play()
+			end
+			
 		end
-	end	
-	
+	end
 	
 end
 
 function scene:getObstacles()
 	local obstacles = {}
-	local player = self.player
+	local player = self.game.player.snake
 	
 	for y = 1, #self.level do
 		table.insert(obstacles, {})
@@ -192,10 +256,25 @@ function scene:getObstacles()
 			table.insert(obstacles[y], self.level[y][x])
 		end
 	end
+	
+	if self.game.mode == "game" then
+		for i = 1, #player.points do
+			local p = player.points[i]
+			obstacles[p.y][p.x] = 1
+		end
+	elseif self.game.mode == "fight" then
+		local player1 = self.player1.snake
+		local player2 = self.player2.snake
 		
-	for i = 1, #player.points do
-		local p = player.points[i]
-		obstacles[p.y][p.x] = 1
+		for i = 1, #player1.points do
+			local p = player1.points[i]
+			obstacles[p.y][p.x] = 1
+		end
+		for i = 1, #player2.points do
+			local p = player2.points[i]
+			obstacles[p.y][p.x] = 1
+		end
+	
 	end
 	
 	return obstacles

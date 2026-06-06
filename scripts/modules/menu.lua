@@ -12,6 +12,7 @@ function Menu:new(menu)
 		menu.height = menu.height or love.graphics.getHeight()
 		menu.game = Menu.game
 		menu.frame = menu.frame or false
+		menu.strings = menu.strings or {}
 		
 	return setmetatable(menu, self)
 end
@@ -19,22 +20,29 @@ end
 function Menu:draw(color1, color2, color3, color4, font)
 	local width = self.width
 	local height = self.height
+	local font = self.font or font
 	
 	love.graphics.push()
 	love.graphics.setColor(color1)
 	love.graphics.rectangle('fill', self.x * state.scaleW, self.y * state.scaleH, width * state.scaleW, height * state.scaleH)
-	love.graphics.setColor(color3)
-	love.graphics.setLineWidth(10)
-	love.graphics.rectangle('line', self.x * state.scaleW, self.y * state.scaleH, width * state.scaleW, height * state.scaleH)
+	if self.frame then
+		love.graphics.setColor(color3)
+		love.graphics.setLineWidth(10)
+		love.graphics.rectangle('line', self.x * state.scaleW, self.y * state.scaleH, width * state.scaleW, height * state.scaleH)
+	end
 	love.graphics.pop()
 	
-	love.graphics.push()	
-	if self.pic then self.pic(self) end
-	
+	love.graphics.push()
 	love.graphics.setFont(font)
 	love.graphics.translate(self.offsetX * state.scaleW, self.offsetY * state.scaleH)
-	love.graphics.scale(state.scaleW, state.scaleH)
 	
+	love.graphics.setColor(color3)
+	love.graphics.rectangle('fill', 0, font:getHeight() * (self.item - 1) * state.scaleH, love.graphics.getWidth(), font:getHeight() * state.scaleH)
+	
+	love.graphics.setColor(color2)	
+	if self.pic then self.pic(self) end
+	
+	love.graphics.scale(state.scaleW, state.scaleH)		
 	
 	for str = 1, #self.strings do
 		local s = self.strings[str]

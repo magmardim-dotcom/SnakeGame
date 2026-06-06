@@ -1,13 +1,11 @@
 local state = {}
 
 state.MENU_HEIGHT = 40
-state.BASIC_FONT = "resurses/font/Opsilon.ttf"
+state.BASIC_FONT = "resurses/font/PeppaPigW1G-Regular.ttf"
 state.FONT_SIZE = 52
 state.FONT2_SIZE = 24
 state.BASIC_W = 1120
 state.BASIC_H = 640
---~ state.BASIC_W = 640
---~ state.BASIC_H = 480
 state.CELL = 20
 state.TXT_COLOR = {0,0,1}
 state.SEL_COLOR = {1,0,0}

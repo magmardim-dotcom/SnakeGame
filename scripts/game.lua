@@ -3,7 +3,8 @@ local game = {}
 function game:load()
 	self.scene = require "scripts/objs/scene"
 	self.scene.game = self
-	self.levels = funct.loadLevels("levels")
+	self.mode = "game"
+	self.levels = funct.loadLevels("levels")	
 	self.play = false
 	self.delay = 0
 	self.score = 0
@@ -12,7 +13,7 @@ function game:load()
 	self.speed = 5		
 	self.highscores = {}	
 		for l = 1, #self.levels do self.highscores[l] = 0 end
-	self.hunger = true
+	self.hunger = false
 	self.life = 6
 	self.max_life = 6
 	self.lifes = {}
@@ -20,7 +21,7 @@ function game:load()
 	self.initalLength = 4
 	self.max_apples = 1
 	
-	self.lvl = 4
+	self.lvl = 3
 	self.font = love.graphics.newFont(state.BASIC_FONT, state.FONT2_SIZE, "normal", 2)
 	
 	self.player = {}
@@ -28,7 +29,7 @@ function game:load()
 		up = "w", down = "s", left = "a", right = "d"
 	}
 	self.player.functCollision = function() self:faled() end
-		
+			
 	if love.filesystem.getInfo("highscores.txt") then
 		local l = 1
 		
@@ -61,18 +62,26 @@ function game:load()
 			self.lifes[self.life] = 0
 		end
 	end
+		
+	self:sceneLoad(self.lvl)
 end
 
 function game:sceneLoad(lvl)
-	self.scene:load(self.levels[lvl], self)
-	
+	self.scene:load(self.levels[lvl], self)	
+	for l = 1, self.max_life do self.lifes[l] = 20 end
+	self.life = self.max_life
+	Screens.faled.msg = Screens.faled.game_over[0]
+end
+
+function game:playMusic()
 	if state.musicPlay then
 		self.music:setLooping(true)
 		self.music:play()
 	end
-	
-	for l = 1, self.max_life do self.lifes[l] = 20 end
-	self.life = self.max_life
+end
+
+function game:stopMusic()
+	self.music:stop()
 end
 
 function game:draw(palette)
@@ -81,6 +90,7 @@ function game:draw(palette)
 	local widthScene = #self.scene.level[1] * state.CELL * scale
 	local heightScene = #self.scene.level * state.CELL * scale
 	local indentX = widthScene <= love.graphics.getWidth() and (love.graphics.getWidth() - widthScene)/2 or 0
+	
 	local indentY = state.MENU_HEIGHT * state.scaleH
 
 	love.graphics.push()
@@ -89,7 +99,7 @@ function game:draw(palette)
 	self.scene:draw(palette)
 	self.shake:pop()
 	love.graphics.pop()
-		
+	
 	self:drawTopMenu(palette)
 end
 
@@ -129,10 +139,10 @@ function game:faled()
 	return false
 end
 
-function game:restart()	
+function game:restart(mode)	
 	local apples = self.scene.apples
 	
-	self.scene:restart()
+	self.scene:restart(mode)
 	self.score = 0	
 	self.play = true
 	for l = 1, self.max_life do self.lifes[l] = 20 end
@@ -162,26 +172,31 @@ function game:drawTopMenu(palette, font)
 	local scale = math.min(scaleW, scaleH)
 	local indentX = 50
 	local indentY = (state.MENU_HEIGHT - self.font:getHeight())/2
+	local menuX = 20 * scale
+	local menuY = 2 * scale
 	
 	love.graphics.push()
 	love.graphics.setColor(palette[1])
-	love.graphics.rectangle('fill', 0,0, love.graphics.getWidth(), state.MENU_HEIGHT * scaleH)
+	love.graphics.rectangle('fill', menuX, menuY * scaleH, love.graphics.getWidth()-menuX*2, (state.MENU_HEIGHT-menuY*2) * scaleH, 9 * scale)
 	love.graphics.setColor(palette[3])
-	love.graphics.setLineWidth(4 * scale)
-	love.graphics.rectangle('line', 0,0, love.graphics.getWidth(), state.MENU_HEIGHT * scaleH)
 	love.graphics.setColor(palette[3])
 	love.graphics.setFont(self.font)
 	love.graphics.scale(scale)
 	
-	local score = string.format("Счет: %d", self.score)
-	local best = string.format(
-		"%s рекорд: %d", 
-		self.scene.level.name and "["..self.scene.level.name.."]" or "", 
-		self.highscores[self.lvl] or 0
-	)
-		
-	love.graphics.printf(score, indentX, indentY, love.graphics.getWidth() - indentX, "left")
-	love.graphics.printf(best, 0, indentY, (love.graphics.getWidth()/scaleW) - indentX, "right")
+	if self.mode == "game" then
+		local score = string.format("Счет: %d", self.score)
+		local best = string.format(
+			"%s рекорд: %d", 
+			self.scene.level.name and "["..self.scene.level.name.."]" or "", 
+			self.highscores[self.lvl] or 0
+		)
+			
+		love.graphics.printf(score, indentX, indentY, love.graphics.getWidth() - indentX, "left")
+		love.graphics.printf(best, 0, indentY, (love.graphics.getWidth()/scaleW) - indentX, "right")
+	elseif self.mode == "fight" then
+		love.graphics.printf(self.scene.score[1], indentX, indentY, love.graphics.getWidth() - indentX, "left")
+		love.graphics.printf(self.scene.score[2], 0, indentY, (love.graphics.getWidth()/scaleW) - indentX, "right")
+	end
 	love.graphics.pop()
 	
 	love.graphics.push()

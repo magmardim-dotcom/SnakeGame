@@ -12,8 +12,9 @@ local GO = {
 		[1] = {
 			nam = "Начать", 
 			act = function(s) 
-				s.game:sceneLoad(s.game.lvl)
+				s.game:playMusic()
 				s.game.play = true
+				s.game:restart(s.game.mode)
 				funct.switchScreen('faled') 
 			end},
 		[2] = 'skip',
@@ -23,7 +24,7 @@ local GO = {
 		},
 		[4] = {
 			nam = function(s) 
-				return "Уровень: "..(s.game.lvl) 
+				return "Выбор уровня" 
 			end, 
 			right = function(s)					
 				if s.game.lvl + 1 <= #s.game.levels then s.game.lvl = s.game.lvl + 1 else s.game.lvl = 1 end
@@ -31,6 +32,9 @@ local GO = {
 			end,
 			left = function(s)						
 				if s.game.lvl - 1 >= 1 then s.game.lvl = s.game.lvl - 1 else s.game.lvl = #s.game.levels end
+			end,
+			act = function(s)
+				funct.switchScreen('levelSelection')
 			end},
 		[5] = {
 			nam = function(s) return "Скорость: "..s.speed[s.speed.i].nam end, 
@@ -46,29 +50,29 @@ local GO = {
 					s.game.speed = s.speed[s.speed.i].s
 				end
 			end},
-		[6] = {
-			nam = function(s) 
-				local onoff = function()
-					if s.game.hunger then
-						return "Да"
-					else
-						return "Нет"
-					end
-				end
+		--~ [6] = {
+			--~ nam = function(s) 
+				--~ local onoff = function()
+					--~ if s.game.hunger then
+						--~ return "Да"
+					--~ else
+						--~ return "Нет"
+					--~ end
+				--~ end
 				
-				return "Голод: "..onoff()
-			end,
-			act = function(s)
-				s.game.hunger = not s.game.hunger
-			end,
-			right = function(s)						
-				s.game.hunger = not s.game.hunger
-			end,
-			left = function(s)						
-				s.game.hunger = not s.game.hunger
-			end
-		},
-		[7] = {nam = "Назад", 
+				--~ return "Голод: "..onoff()
+			--~ end,
+			--~ act = function(s)
+				--~ s.game.hunger = not s.game.hunger
+			--~ end,
+			--~ right = function(s)						
+				--~ s.game.hunger = not s.game.hunger
+			--~ end,
+			--~ left = function(s)						
+				--~ s.game.hunger = not s.game.hunger
+			--~ end
+		--~ },
+		[6] = {nam = "Назад", 
 			act = function() 
 				funct.switchScreen('title') 
 			end},

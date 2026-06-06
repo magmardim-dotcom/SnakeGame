@@ -43,7 +43,33 @@ function Snake:draw(color, cell)
 	end
 end
 
+
+
 function Snake:update(dt, apples)
+	if self.moves[1] then
+		local dx, dy = self.dx, self.dy
+		local key = self.moves[1]
+		
+		if key == 'up' and self.dy ~= 1 then
+			dy = -1
+			dx = 0
+		elseif key == 'down' and self.dy ~= -1 then
+			dy = 1
+			dx = 0
+		elseif key == 'left' and self.dx ~= 1 then
+			dx = -1
+			dy = 0
+		elseif key == 'right' and self.dx ~= -1 then
+			dx = 1
+			dy = 0
+		end	
+		
+		self.dx = dx
+		self.dy = dy
+		
+		-- table.remove(self.moves, 1)
+	end
+	
 	if not self:collision() then
 		self:move(apples)
 	end
