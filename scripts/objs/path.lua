@@ -15,12 +15,15 @@ function Path:new(x, y, dx, dy, map)
     return path
 end
 
+local function wrap(val, max)
+    return ((val - 1 + max) % max) + 1
+end
+
 function Path:search(gx, gy)
     local map   = self.map
     local maxY  = #map
     local maxX  = #map[1]
 
-    -- ---------- очередь (FIFO) ----------
     local queue = {}
     local head  = 1
     local enqueue = function(s) queue[#queue+1] = s end
@@ -32,15 +35,13 @@ function Path:search(gx, gy)
         end
     end
 
-    -- ---------- старт ----------
     local startKey = string.format("%d,%d,%d,%d", self.x, self.y, self.dx, self.dy)
     local visited  = {[startKey] = true}
-    local pred     = {}          -- key -> предыдущий state
+    local pred     = {}          
     enqueue({x=self.x, y=self.y, dx=self.dx, dy=self.dy})
 
     local goalState = nil
 
-    -- ---------- BFS ----------
     while true do
         local cur = dequeue()
         if not cur then break end
@@ -50,69 +51,58 @@ function Path:search(gx, gy)
             break
         end
 
-        -- ---- генерируем только 3 допустимых направления ----
-        local moves = {}
+        local moves = {
+            {dx=cur.dx, dy=cur.dy},
+            (cur.dx==1 and {dx=0, dy=-1}) or
+            (cur.dx==-1 and {dx=0, dy=1}) or
+            (cur.dy==1  and {dx=1, dy=0}) or
+            (cur.dy==-1 and {dx=-1, dy=0}),
+            (cur.dx==1 and {dx=0, dy=1}) or
+            (cur.dx==-1 and {dx=0, dy=-1}) or
+            (cur.dy==1  and {dx=-1, dy=0}) or
+            (cur.dy==-1 and {dx=1, dy=0})
+        }
 
-        -- 1. Прямо
-        table.insert(moves, {dx=cur.dx, dy=cur.dy})
-
-        -- 2. Налево
-        local ldx, ldy
-        if cur.dx == 1 and cur.dy == 0 then           -- идём вправо
-            ldx, ldy = 0, -1
-        elseif cur.dx == -1 and cur.dy == 0 then      -- идём влево
-            ldx, ldy = 0, 1
-        elseif cur.dx == 0 and cur.dy == 1 then       -- идём вниз
-            ldx, ldy = 1, 0
-        else                                          -- идём вверх
-            ldx, ldy = -1, 0
-        end
-        table.insert(moves, {dx=ldx, dy=ldy})
-
-        -- 3. Направо
-        local rdx, rdy
-        if cur.dx == 1 and cur.dy == 0 then           -- идём вправо
-            rdx, rdy = 0, 1
-        elseif cur.dx == -1 and cur.dy == 0 then      -- идём влево
-            rdx, rdy = 0, -1
-        elseif cur.dx == 0 and cur.dy == 1 then       -- идём вниз
-            rdx, rdy = -1, 0
-        else                                          -- идём вверх
-            rdx, rdy = 1, 0
-        end
-        table.insert(moves, {dx=rdx, dy=rdy})
-
-        -- ---- проверяем соседние клетки ----
         for _, m in ipairs(moves) do
-            local nx = cur.x + m.dx
-            local ny = cur.y + m.dy
+            local nx = wrap(cur.x + m.dx, maxX)
+            local ny = wrap(cur.y + m.dy, maxY)
 
-            if nx >= 1 and nx <= maxX and ny >= 1 and ny <= maxY then
-                if map[ny][nx] == 0 then          -- свободна
-                    local key = string.format("%d,%d,%d,%d", nx, ny, m.dx, m.dy)
-                    if not visited[key] then
-                        visited[key] = true
-                        pred[key] = cur
-                        enqueue({x=nx, y=ny, dx=m.dx, dy=m.dy})
-                    end
+            if map[ny][nx] == 0 then
+                local key = string.format("%d,%d,%d,%d",
+                                          nx, ny, m.dx, m.dy)
+                if not visited[key] then
+                    visited[key] = true
+                    pred[key] = cur
+                    enqueue({x=nx, y=ny, dx=m.dx, dy=m.dy})
                 end
             end
         end
     end
-
-    -- ---------- восстановление пути ----------
-    self.path = {}
+        
     if goalState then
-        local s = goalState
-        while true do
-            table.insert(self.path, 1, {x=s.x, y=s.y})
-            local key = string.format("%d,%d,%d,%d", s.x, s.y, s.dx, s.dy)
-            local p = pred[key]
-            if not p then break end
-            s = p
+        self.path = {}
+        local state = goalState
+        while state do
+            table.insert(self.path, 1, {x=state.x, y=state.y})
+            local key = string.format("%d,%d,%d,%d",
+                                      state.x, state.y, state.dx, state.dy)
+            state = pred[key]
+        end
+
+        self.moves = {}
+        for i = 2, #self.path do
+            local prev = self.path[i-1]
+            local cur  = self.path[i]
+            local dx   = cur.x - prev.x
+            local dy   = cur.y - prev.y
+
+            if dx > 0 then self.moves[#self.moves + 1] = "right" end
+            if dx < 0 then self.moves[#self.moves + 1] = "left"  end
+            if dy > 0 then self.moves[#self.moves + 1] = "down" end
+            if dy < 0 then self.moves[#self.moves + 1] = "up"  end
         end
     end
-
+	
     return goalState ~= nil
 end
 

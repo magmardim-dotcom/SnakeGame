@@ -3,6 +3,8 @@ local game = {}
 function game:load()
 	self.scene = require "scripts/objs/scene"
 	self.scene.game = self
+	local scene = self.scene
+	scene.score = {0, 0}
 	self.mode = "game"
 	self.levels = funct.loadLevels("levels")	
 	self.play = false
@@ -10,7 +12,7 @@ function game:load()
 	self.score = 0
 	self.add_points = 100
 	self.best = 0	
-	self.speed = 5		
+	self.speed = 15		
 	self.highscores = {}	
 		for l = 1, #self.levels do self.highscores[l] = 0 end
 	self.hunger = false
@@ -21,7 +23,7 @@ function game:load()
 	self.initalLength = 4
 	self.max_apples = 1
 	
-	self.lvl = 3
+	self.lvl = 1
 	self.font = love.graphics.newFont(state.BASIC_FONT, state.FONT2_SIZE, "normal", 2)
 	
 	self.player = {}
@@ -29,6 +31,28 @@ function game:load()
 		up = "w", down = "s", left = "a", right = "d"
 	}
 	self.player.functCollision = function() self:faled() end
+	
+	scene.player1 = {}
+	scene.player1.control = {
+		up = "w", down = "s", left = "a", right = "d"
+	}
+	scene.player1.functCollision = function()
+		self:faled()
+		--~ self:restart(self.mode)
+		scene.score[2] = scene.score[2] + 1
+	end
+				
+	scene.player2 = {}
+	scene.player2.control = {
+		up = "up", down = "down", left = "left", right = "right"
+	}
+	scene.player2.functCollision = function()
+		self:faled()
+		--~ self:restart(self.mode)
+		scene.score[1] = scene.score[1] + 1
+	end
+	scene.score = {0, 0}
+	scene.m = 1 -- режим сражения 1 - с другом, 2 - с компом
 			
 	if love.filesystem.getInfo("highscores.txt") then
 		local l = 1
@@ -139,10 +163,10 @@ function game:faled()
 	return false
 end
 
-function game:restart(mode)	
+function game:restart(mode, m)	
 	local apples = self.scene.apples
 	
-	self.scene:restart(mode)
+	self.scene:restart(mode, m)
 	self.score = 0	
 	self.play = true
 	for l = 1, self.max_life do self.lifes[l] = 20 end
@@ -194,8 +218,8 @@ function game:drawTopMenu(palette, font)
 		love.graphics.printf(score, indentX, indentY, love.graphics.getWidth() - indentX, "left")
 		love.graphics.printf(best, 0, indentY, (love.graphics.getWidth()/scaleW) - indentX, "right")
 	elseif self.mode == "fight" then
-		love.graphics.printf(self.scene.score[1], indentX, indentY, love.graphics.getWidth() - indentX, "left")
-		love.graphics.printf(self.scene.score[2], 0, indentY, (love.graphics.getWidth()/scaleW) - indentX, "right")
+		love.graphics.printf("Игрок 1: "..#self.scene.player1.snake.points, indentX, indentY, love.graphics.getWidth() - indentX, "left")
+		love.graphics.printf("Игрок 2: "..#self.scene.player2.snake.points, 0, indentY, (love.graphics.getWidth()/scaleW) - indentX, "right")
 	end
 	love.graphics.pop()
 	

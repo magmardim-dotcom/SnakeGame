@@ -49,7 +49,7 @@ local function isVector(...)
 	end
 end
 
-function Vec:getLenght(vec)
+function Vec:getLenght()
 	return math.sqrt(self.x ^ 2 + self.y ^ 2)
 end
 

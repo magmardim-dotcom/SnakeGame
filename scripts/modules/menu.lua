@@ -37,7 +37,7 @@ function Menu:draw(color1, color2, color3, color4, font)
 	love.graphics.translate(self.offsetX * state.scaleW, self.offsetY * state.scaleH)
 	
 	love.graphics.setColor(color3)
-	love.graphics.rectangle('fill', 0, font:getHeight() * (self.item - 1) * state.scaleH, love.graphics.getWidth(), font:getHeight() * state.scaleH)
+	love.graphics.rectangle('fill', self.x * state.scaleW, font:getHeight() * (self.item - 1) * state.scaleH, self.width * state.scaleW, font:getHeight() * state.scaleH)
 	
 	love.graphics.setColor(color2)	
 	if self.pic then self.pic(self) end

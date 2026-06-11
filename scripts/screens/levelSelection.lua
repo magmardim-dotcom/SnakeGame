@@ -41,6 +41,8 @@ return Modules.Menu:new(
 		offsetY = 40,
 		modI = 1,
 		item = 2,
+		width = state.BASIC_W,
+		height = state.BASIC_H,
 		strings = {
 			levelS, levleN, "skip", "skip", "skip", "skip", levelB, back
 		},

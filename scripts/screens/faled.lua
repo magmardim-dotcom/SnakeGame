@@ -10,7 +10,11 @@ local Faled = Modules.Menu:new({
 	strings = {
 		[1] = {
 			nam = function(s)
-				return s.msg.."\nТвой счет: "..s.game.score
+				if s.game.mode == "game" then
+					return s.msg.."\nТвой счет: "..s.game.score
+				elseif s.game.mode == "fight" then
+					return string.format("Счет: \n%d - %d \nСледующий раунд?", s.game.scene.score[1], s.game.scene.score[2]) 
+				end
 			end,
 			skip = true},
 		[2] = 'skip',
@@ -20,13 +24,18 @@ local Faled = Modules.Menu:new({
 		[6] = {
 			nam = "повторить", 
 			act = function(s) 
-				s.game:restart(s.game.mode) 
+				s.game:restart(s.game.mode, s.game.scene.m) 
 				s.item = 6
 			end},
 		[7] = {
 			nam = "назад", 
 			act = function(s) 
-				funct.switchScreen('options') 
+				if s.game.mode == "game" then
+					funct.switchScreen('options') 
+				elseif s.game.mode == "fight" then
+					funct.switchScreen('title') 
+				end
+				
 				s.game.music:setVolume(state.musicVol)
 				s.game:stopMusic()
 				s.game.music:setEffect("reverb", false)

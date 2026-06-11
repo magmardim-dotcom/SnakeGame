@@ -1,5 +1,5 @@
 local dbg = require "scripts/dbg"
-	visDbg = false
+	visDbg = true
 
 funct = require "scripts/functions" 
 state = require "scripts/state"
@@ -17,7 +17,7 @@ function love.load()
 	Screens = funct.loadScripts("scripts/screens")
 	game:load()
 		curScreen = 'title'
-	if love.system.getOS() == "Android" then
+	if love.system.getOS() == "Android" or love.system.getOS() == "Linux" then
 		funct.fullScreen(true)
 	end
 end

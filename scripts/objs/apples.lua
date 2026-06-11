@@ -15,9 +15,13 @@ function Apple:move_random(scene)
 	return x, y
 end
 
-function Apple:new(scene, act)
+function Apple:new(scene, act, x, y)
 	local apple = {}
-		apple.x, apple.y = self:move_random(scene)	
+		if not x or not y then
+			apple.x, apple.y = self:move_random(scene)
+		else
+			apple.x, apple.y = x, y
+		end	
 		apple.r = 0
 		apple.angle = math.pi/2
 		apple.activate = act

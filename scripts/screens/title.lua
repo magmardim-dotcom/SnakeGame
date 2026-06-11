@@ -1,3 +1,5 @@
+local mode = {"c Другом", "c Компом", "между Компами"}
+
 local newgame = {
 	nam = "Играть", 
 	act = function(s) 
@@ -15,18 +17,29 @@ local options = {
 local exit = {nam = "Выход", act = function() love.event.quit() end}
 
 local fight = {
-	nam = "Сражение",
+	nam = function(s)
+		return "Дуэль "..mode[s.m]
+	end,
+	left = function(s)
+		if s.m - 1 >= 1 then s.m = s.m - 1 else s.m = #mode end
+	end,
+	right = function(s)
+		if s.m + 1 <= #mode then s.m = s.m + 1 else s.m = 1 end
+	end,
 	act = function(s) 
 		s.game.mode = "fight"
-		s.game:sceneLoad(1)
+		s.game.scene.score = {0, 0}
+		s.game:sceneLoad(s.game.lvl)
 		s.game:playMusic()
 		s.game.play = true
-		s.game:restart(s.game.mode)
+		s.game:restart(s.game.mode, s.m)
 		funct.switchScreen('faled')
 	end
 }
 
 local Title = Modules.Menu:new({
+	m = 3,
+	item = 2,
 	offsetY = 300,
 	width = state.BASIC_W,
 	height = state.BASIC_H,

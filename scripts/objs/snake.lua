@@ -1,3 +1,6 @@
+local Path = require "scripts/objs/path"
+local Vector = require "scripts/modules/Vector"
+
 local Snake = {}
 	Snake.__index = Snake
 
@@ -11,8 +14,8 @@ function Snake:new(scene, x, y, dx, dy, size, fc)
 		snake.moves = {}
 		snake.points = {}
 			for i = 1, size do table.insert(snake.points, {x = x - i*dx, y = y}) end
-		snake.path = {}
 		snake.functCollision = fc or function() end
+		snake.apple = 1
 			
 	return setmetatable(snake, self)
 end
@@ -34,45 +37,23 @@ function Snake:draw(color, cell)
 	for i = 1, #self.points do
 		local p = self.points[i]
 		local l = 0.7/#self.points
-		
-		love.graphics.push()
+				
+		love.graphics.push()		
 			love.graphics.setColor(color[1],color[2],color[3],1.1-l*i)
 			love.graphics.translate(cell*0.1, cell*0.1)
-			love.graphics.rectangle('fill', (p.x-1)*cell, (p.y-1)*cell, cell*0.8, cell*0.8)
+			love.graphics.setLineWidth(2)
+			if i > 1 then				
+				love.graphics.rectangle('fill', (p.x-1)*cell, (p.y-1)*cell, cell*0.8, cell*0.8)
+			else
+				love.graphics.rectangle('line', (p.x-1)*cell, (p.y-1)*cell, cell*0.8, cell*0.8)
+			end
 		love.graphics.pop()
 	end
 end
 
-
-
 function Snake:update(dt, apples)
-	if self.moves[1] then
-		local dx, dy = self.dx, self.dy
-		local key = self.moves[1]
-		
-		if key == 'up' and self.dy ~= 1 then
-			dy = -1
-			dx = 0
-		elseif key == 'down' and self.dy ~= -1 then
-			dy = 1
-			dx = 0
-		elseif key == 'left' and self.dx ~= 1 then
-			dx = -1
-			dy = 0
-		elseif key == 'right' and self.dx ~= -1 then
-			dx = 1
-			dy = 0
-		end	
-		
-		self.dx = dx
-		self.dy = dy
-		
-		-- table.remove(self.moves, 1)
-	end
-	
-	if not self:collision() then
-		self:move(apples)
-	end
+	local o = self.scene:getObstacles()
+	self:cpu(o)
 	
 	if self.moves[1] then
 		local dx, dy = self.dx, self.dy
@@ -96,6 +77,10 @@ function Snake:update(dt, apples)
 		self.dy = dy
 		
 		table.remove(self.moves, 1)
+	end	
+	
+	if not self:collision(o) then
+		self:move()
 	end
 end
 
@@ -118,7 +103,7 @@ function Snake:move()
 		y = 1	
 	end
 	
-	table.insert(self.points, 1, {x = x, y = y})
+	table.insert(self.points, 1, {x = x, y = y, fat = false})
 end
 
 function Snake:eat(apples)
@@ -142,7 +127,6 @@ function Snake:control(key, up, down, left, right)
 	
 		local move = ""
 		local head = self.points[1]
-		local level = self.scene:getObstacles()
 		
 		if key == up then
 			move = "up"
@@ -159,12 +143,13 @@ function Snake:control(key, up, down, left, right)
 	end
 end
 
-function Snake:collision()
+function Snake:collision(o)
 	local head = self.points[1]
 
-	local level = self.scene:getObstacles()
+	local level = o 
+	local nx, ny = head.x + self.dx, head.y + self.dy
 	
-	if level[head.y + self.dy] and level[head.y + self.dy][head.x + self.dx] == 1 then
+	if level[ny] and level[ny][nx] == 1 then
 		self.functCollision()
 		return true
 	end
@@ -183,6 +168,38 @@ function Snake:damageCollision()
 	end
 	
 	return false
+end
+
+function Snake:cpu(o)
+	
+	local head = self.points[1]
+	local apples = self.scene.apples
+		
+	self.path = Path:new(
+			self.points[1].x, 
+			self.points[1].y, 
+			self.dx, 
+			self.dy, 
+			o
+		)
+
+	self.path:search(apples[self.apple].x, apples[self.apple].y)
+	self.moves = self.path.moves or {}
+end
+
+function Snake:findApples()
+	local head = self.points[1]
+	local apples = self.scene.apples
+	local minl = Vector:new(apples[1].x - head.x, apples[1].y - head.y):getLenght()
+	local ak = 1
+	for k, a in ipairs(apples) do 
+		local vec = Vector:new(a.x - head.x, a.y - head.y)
+		if vec:getLenght() < minl then
+			minl = vec:getLenght() 
+			ak = k
+		end
+	end
+	self.apple = ak
 end
 
 return Snake
