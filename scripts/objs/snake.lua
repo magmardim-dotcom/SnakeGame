@@ -51,9 +51,10 @@ function Snake:draw(color, cell)
 	end
 end
 
-function Snake:update(dt, apples)
+function Snake:update(dt, cpu)
 	local o = self.scene:getObstacles()
-	self:cpu(o)
+	
+	if cpu then self:cpu(o)end
 	
 	if self.moves[1] then
 		local dx, dy = self.dx, self.dy
@@ -170,7 +171,7 @@ function Snake:damageCollision()
 	return false
 end
 
-function Snake:cpu(o)
+function Snake:cpu(path)
 	
 	local head = self.points[1]
 	local apples = self.scene.apples
@@ -180,7 +181,7 @@ function Snake:cpu(o)
 			self.points[1].y, 
 			self.dx, 
 			self.dy, 
-			o
+			path
 		)
 
 	self.path:search(apples[self.apple].x, apples[self.apple].y)

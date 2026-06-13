@@ -12,7 +12,7 @@ function game:load()
 	self.score = 0
 	self.add_points = 100
 	self.best = 0	
-	self.speed = 15		
+	self.speed = 5		
 	self.highscores = {}	
 		for l = 1, #self.levels do self.highscores[l] = 0 end
 	self.hunger = false

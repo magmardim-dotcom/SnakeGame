@@ -163,7 +163,7 @@ function scene:update(dt)
 		
 		if self.game.delay % (13 - game.speed) == 0 then
 						
-			player:update(dt, self.apples)	
+			player:update(dt)	
 			
 			if player:damageCollision() then
 				game.shake:start(0.1, 1, 1)
@@ -207,8 +207,8 @@ function scene:update(dt)
 			local player1 = self.player1.snake
 			local player2 = self.player2.snake
 			
-			player1:update(dt, self.apples)
-			player2:update(dt, self.apples)
+			player2:update(dt, self.m > 1)
+			player1:update(dt, self.m > 2)
 			
 			if player2:eat(self.apples) then
 				table.insert(self.apples, Apple:new(self, true))
