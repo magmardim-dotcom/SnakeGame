@@ -14,28 +14,64 @@ local dir = {
 	{1,0}, {-1,0}, {0,1}, {0,-1}
 }
 
-local h = function(start, goal, W)
-	local sx, sy = decode(start, W)
-	local gx, gy = decode(goal, W)
+--~ local h = function(start, goal, W)
+	--~ local sx, sy = decode(start, W)
+	--~ local gx, gy = decode(goal, W)
 	
-	return math.abs(sx-gx) + math.abs(sy-gy)
+	--~ return math.abs(sx-gx) + math.abs(sy-gy)
+--~ end
+
+local h = function(start, goal, W, H)
+    local sx, sy = decode(start, W)
+    local gx, gy = decode(goal, W)
+
+    local dx = math.abs(sx - gx)
+    local dy = math.abs(sy - gy)
+
+    local dxt = math.min(dx, W - dx)
+    local dyt = math.min(dy, H - dy)
+
+    return dxt + dyt
 end
 
+--~ local getNeighbors = function(i, map)
+	--~ local neighbors = {}
+	--~ local x,y = decode(i, map.width)
+	--~ for _, d in ipairs(dir) do
+		--~ local dx = x + d[1]
+		--~ local dy = y + d[2]
+		--~ if map[encode(dx, dy, map.width)] == 0 then
+			--~ neighbors[#neighbors+1] = encode(dx, dy, map.width)			
+		--~ end
+	--~ end
+	--~ return neighbors
+--~ end
+
 local getNeighbors = function(i, map)
-	local neighbors = {}
-	local x,y = decode(i, map.width)
-	for _, d in ipairs(dir) do
-		local dx = x + d[1]
-		local dy = y + d[2]
-		if map[encode(dx, dy, map.width)] == 0 then
-			neighbors[#neighbors+1] = encode(dx, dy, map.width)			
-		end
-	end
-	return neighbors
+    local neighbors = {}
+    local x, y = decode(i, map.width)
+
+    for _, d in ipairs(dir) do
+        local nx = x + d[1]
+        local ny = y + d[2]
+
+        if nx < 1 then nx = map.width end
+        if nx > map.width then nx = 1 end
+
+        if ny < 1 then ny = map.height end
+        if ny > map.height then ny = 1 end
+
+        local idx = encode(nx, ny, map.width)
+        if map[idx] == 0 then
+            neighbors[#neighbors+1] = idx
+        end
+    end
+    return neighbors
 end
 
 local astar = function(start, goal, map)
-	local width = map.width	
+	local width, height = map.width, map.height	
+	
 	local openset = Heap:new()
 	local closedset = {}
 	local camefrom = {}
@@ -43,7 +79,7 @@ local astar = function(start, goal, map)
 	local current = {
 		v = start,
 		g = 0,
-		f = 0 + h(start, goal, width)
+		f = 0 + h(start, goal, width, height)
 	}
 	
 	openset:push(current)
@@ -84,7 +120,7 @@ local astar = function(start, goal, map)
 					local neighbor = {
 							v = n,
 							g = tentative_g,
-							f = tentative_g + h(n, goal, width)
+							f = tentative_g + h(n, goal, width, height)
 						}
 						
 					if not is_in then
