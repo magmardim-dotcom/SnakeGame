@@ -1,4 +1,4 @@
-local Path = require "scripts/objs/path"
+local Path = require "scripts/modules/Path"
 local Vector = require "scripts/modules/Vector"
 
 local Snake = {}
@@ -16,7 +16,7 @@ function Snake:new(scene, x, y, dx, dy, size, fc)
 			for i = 1, size do table.insert(snake.points, {x = x - i*dx, y = y}) end
 		snake.functCollision = fc or function() end
 		snake.apple = 1
-			
+		
 	return setmetatable(snake, self)
 end
 
@@ -49,6 +49,7 @@ function Snake:draw(color, cell)
 			end
 		love.graphics.pop()
 	end
+	if self.path then self.path:draw({1,0,0,.1}, cell) end
 end
 
 function Snake:update(dt, cpu)
@@ -171,20 +172,13 @@ function Snake:damageCollision()
 	return false
 end
 
-function Snake:cpu(path)
-	
+function Snake:cpu(map)
 	local head = self.points[1]
 	local apples = self.scene.apples
-		
-	self.path = Path:new(
-			self.points[1].x, 
-			self.points[1].y, 
-			self.dx, 
-			self.dy, 
-			path
-		)
-
+	self:findApples()
+	self.path = Path:new(head.x, head.y, map)
 	self.path:search(apples[self.apple].x, apples[self.apple].y)
+	
 	self.moves = self.path.moves or {}
 end
 
@@ -194,10 +188,12 @@ function Snake:findApples()
 	local minl = Vector:new(apples[1].x - head.x, apples[1].y - head.y):getLenght()
 	local ak = 1
 	for k, a in ipairs(apples) do 
-		local vec = Vector:new(a.x - head.x, a.y - head.y)
-		if vec:getLenght() < minl then
-			minl = vec:getLenght() 
-			ak = k
+		if a.activate then
+			local vec = Vector:new(a.x - head.x, a.y - head.y)
+			if vec:getLenght() < minl then
+				minl = vec:getLenght() 
+				ak = k
+			end
 		end
 	end
 	self.apple = ak

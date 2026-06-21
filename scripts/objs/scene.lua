@@ -163,7 +163,7 @@ function scene:update(dt)
 		
 		if self.game.delay % (13 - game.speed) == 0 then
 						
-			player:update(dt)	
+			player:update(dt, true)	
 			
 			if player:damageCollision() then
 				game.shake:start(0.1, 1, 1)
@@ -181,7 +181,8 @@ function scene:update(dt)
 			
 			if player:eat(self.apples) then 
 				local add = 20 - (20 - game.lifes[game.life])
-							
+				
+				--~ player:findApples()				
 				game.score = game.score + game.add_points
 								
 				if game.life < 6 then
@@ -199,14 +200,12 @@ function scene:update(dt)
 				if Screens.faled.game_over[game.score/1000] then 
 					Screens.faled.msg = Screens.faled.game_over[game.score/1000]
 				end
-				
 			end
 		end	
 	elseif game.mode == "fight" then
 		if self.game.delay % (13 - game.speed) == 0 then
 			local player1 = self.player1.snake
 			local player2 = self.player2.snake
-			
 			player2:update(dt, self.m > 1)
 			player1:update(dt, self.m > 2)
 			
@@ -214,9 +213,7 @@ function scene:update(dt)
 				table.insert(self.apples, Apple:new(self, true))
 				local sound = game.audio.eat:clone()
 				sound:setPitch(math.random(6,12) * 0.1)
-				sound:play()
-				player1:findApples()
-				player2:findApples()
+				sound:play()			
 			end
 			
 			if player1:eat(self.apples) then
@@ -224,9 +221,9 @@ function scene:update(dt)
 				local sound = game.audio.eat:clone()
 				sound:setPitch(math.random(6,12) * 0.1)
 				sound:play()
-				player1:findApples()
-				player2:findApples()
-			end						
+			end	
+			
+								
 		end
 	end
 	
